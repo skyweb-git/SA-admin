@@ -9,7 +9,7 @@ export const getApiBaseUrl = () => {
     return clean.endsWith('/api') ? clean : `${clean}/api`;
   }
 
-  return 'https://sa.skywebinternational.com/api';
+  return 'http://localhost:5001/api';
 };
 
 export const API_BASE_URL = getApiBaseUrl();
