@@ -4,6 +4,7 @@ const CURRENT_SESSION_ID_KEY = 'edion_royal_current_session_id_v1';
 let heartbeatTimer = null;
 let lastInteractionTime = Date.now();
 let isUserActive = true;
+let isBackendSessionsSupported = true;
 
 // Helper to track activity interactions
 function setupActivityListeners() {
@@ -34,6 +35,15 @@ function setupActivityListeners() {
 export async function startEmployeeSession(user) {
   if (!user || !user.email) return null;
 
+  const fallbackSessionId = `local-sess-${Date.now().toString(36)}`;
+
+  // If backend endpoint was already determined to be unavailable, fallback to local tracking
+  if (!isBackendSessionsSupported) {
+    localStorage.setItem(CURRENT_SESSION_ID_KEY, fallbackSessionId);
+    setupActivityListeners();
+    return fallbackSessionId;
+  }
+
   try {
     const res = await fetch(`${API_BASE_URL}/sessions/login`, {
       method: 'POST',
@@ -46,19 +56,33 @@ export async function startEmployeeSession(user) {
       })
     });
 
-    const json = await res.json();
-    if (json.success && json.data?.sessionId) {
-      const sessionId = json.data.sessionId;
-      localStorage.setItem(CURRENT_SESSION_ID_KEY, sessionId);
-
+    if (res.status === 404) {
+      // Backend does not have /api/sessions yet (or pending deployment)
+      isBackendSessionsSupported = false;
+      localStorage.setItem(CURRENT_SESSION_ID_KEY, fallbackSessionId);
       setupActivityListeners();
-      startHeartbeat(sessionId);
-      return sessionId;
+      return fallbackSessionId;
+    }
+
+    if (res.ok) {
+      const json = await res.json();
+      if (json.success && json.data?.sessionId) {
+        const sessionId = json.data.sessionId;
+        localStorage.setItem(CURRENT_SESSION_ID_KEY, sessionId);
+
+        setupActivityListeners();
+        startHeartbeat(sessionId);
+        return sessionId;
+      }
     }
   } catch (err) {
-    console.warn('Session start error:', err.message);
+    // Suppress network errors and use local fallback session
+    isBackendSessionsSupported = false;
   }
-  return null;
+
+  localStorage.setItem(CURRENT_SESSION_ID_KEY, fallbackSessionId);
+  setupActivityListeners();
+  return fallbackSessionId;
 }
 
 /**
@@ -68,12 +92,17 @@ function startHeartbeat(sessionId) {
   if (heartbeatTimer) clearInterval(heartbeatTimer);
 
   heartbeatTimer = setInterval(async () => {
+    if (!isBackendSessionsSupported) {
+      clearInterval(heartbeatTimer);
+      return;
+    }
+
     // If no mouse/keyboard interaction for > 3 minutes, mark as idle
     const timeSinceInteraction = Date.now() - lastInteractionTime;
     const active = isUserActive && timeSinceInteraction < 3 * 60 * 1000 && !document.hidden;
 
     try {
-      await fetch(`${API_BASE_URL}/sessions/heartbeat`, {
+      const res = await fetch(`${API_BASE_URL}/sessions/heartbeat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -82,8 +111,12 @@ function startHeartbeat(sessionId) {
           activeDeltaSeconds: 30
         })
       });
+      if (res.status === 404) {
+        isBackendSessionsSupported = false;
+        clearInterval(heartbeatTimer);
+      }
     } catch (err) {
-      console.warn('Heartbeat error:', err.message);
+      // Suppress heartbeat errors
     }
   }, 30000);
 }
@@ -95,37 +128,43 @@ export async function stopEmployeeSession(userEmail) {
   if (heartbeatTimer) clearInterval(heartbeatTimer);
   const sessionId = localStorage.getItem(CURRENT_SESSION_ID_KEY);
 
-  try {
-    await fetch(`${API_BASE_URL}/sessions/logout`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        sessionId,
-        employeeEmail: userEmail
-      })
-    });
-  } catch (err) {
-    console.warn('Session stop error:', err.message);
-  } finally {
-    localStorage.removeItem(CURRENT_SESSION_ID_KEY);
+  if (isBackendSessionsSupported && sessionId && !sessionId.startsWith('local-sess-')) {
+    try {
+      await fetch(`${API_BASE_URL}/sessions/logout`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sessionId,
+          employeeEmail: userEmail
+        })
+      });
+    } catch (err) {
+      // Silent catch on logout
+    }
   }
+
+  localStorage.removeItem(CURRENT_SESSION_ID_KEY);
 }
 
 /**
  * Fetch Centralized Time & Activity Monitoring Data for Managers
  */
 export async function fetchCentralizedMonitoringData(dateStr = '') {
+  if (!isBackendSessionsSupported) return null;
+
   try {
     const url = dateStr 
       ? `${API_BASE_URL}/sessions/monitoring?date=${dateStr}` 
       : `${API_BASE_URL}/sessions/monitoring`;
       
     const res = await fetch(url);
-    if (!res.ok) throw new Error('Failed to fetch monitoring data');
-    const json = await res.json();
-    return json;
+    if (res.status === 404) {
+      isBackendSessionsSupported = false;
+      return null;
+    }
+    if (!res.ok) return null;
+    return await res.json();
   } catch (err) {
-    console.warn('Centralized monitoring fetch failed:', err.message);
     return null;
   }
 }
@@ -134,12 +173,17 @@ export async function fetchCentralizedMonitoringData(dateStr = '') {
  * Fetch Session History Audit Log for a Specific Employee
  */
 export async function fetchEmployeeSessionAudit(employeeId) {
+  if (!isBackendSessionsSupported) return { success: false, data: [] };
+
   try {
     const res = await fetch(`${API_BASE_URL}/sessions/employee/${employeeId}`);
-    if (!res.ok) throw new Error('Failed to fetch employee sessions');
+    if (res.status === 404) {
+      isBackendSessionsSupported = false;
+      return { success: false, data: [] };
+    }
+    if (!res.ok) return { success: false, data: [] };
     return await res.json();
   } catch (err) {
-    console.warn('Employee session audit fetch failed:', err.message);
     return { success: false, data: [] };
   }
 }
