@@ -40,8 +40,8 @@ export default function LeadDetailDrawer({
         status: lead.status || 'New',
         notes: lead.notes || '',
         followUpDate: lead.followUpDate || '',
-        unitInterest: lead.unitInterest || '300 SQ YD Villa',
-        budget: lead.budget || '₹3.8 Cr - ₹5.5 Cr',
+        unitInterest: lead.unitInterest || 'Renovated Double Room',
+        budget: lead.budget || '',
         assignedToId: lead.assignedToId || lead.assignedTo || '',
         assignedToName: lead.assignedToName || lead.assignedEmployeeName || ''
       });
@@ -69,7 +69,7 @@ export default function LeadDetailDrawer({
   };
 
   const handleDelete = () => {
-    if (window.confirm(`Delete lead "${lead.fullName}"?`)) {
+    if (window.confirm(`Delete reservation enquiry for "${lead.fullName}"?`)) {
       deleteLead(lead.id);
       if (onRefresh) onRefresh();
       onClose();
@@ -77,9 +77,9 @@ export default function LeadDetailDrawer({
   };
 
   const cleanPhone = (lead.phone || '').replace(/[^0-9]/g, '');
-  const formattedPhone = cleanPhone.length === 10 ? '91' + cleanPhone : cleanPhone;
+  const formattedPhone = cleanPhone.startsWith('27') ? cleanPhone : (cleanPhone.startsWith('0') ? '27' + cleanPhone.substring(1) : cleanPhone);
   const whatsappMsg = encodeURIComponent(
-    `Hello ${lead.fullName || 'Sir/Madam'}, greeting from Maytri Ambhuja Luxury Villa Township, Hyderabad. We would love to assist you with the villa floor plans and site visit details.`
+    `Hello ${lead.fullName || 'Guest'}, greetings from Edion Royal Guesthouse, Milnerton, Cape Town. We would love to assist you with room availability and your stay dates.`
   );
 
   return (
@@ -206,23 +206,23 @@ export default function LeadDetailDrawer({
             </div>
 
             <div className="form-group" style={{ marginTop: '0.5rem' }}>
-              <label className="form-label">Villa Configuration Preference</label>
+              <label className="form-label">Room Type Preference</label>
               <input
                 type="text"
                 value={formData.unitInterest}
                 onChange={(e) => setFormData(prev => ({ ...prev, unitInterest: e.target.value }))}
-                placeholder="e.g. 300 SQ YD East Facing 4BHK"
+                placeholder="e.g. Renovated Double Room"
                 className="form-input"
               />
             </div>
 
             <div className="form-group">
-              <label className="form-label">Estimated Budget Range</label>
+              <label className="form-label">Dates / Stay Notes</label>
               <input
                 type="text"
                 value={formData.budget}
                 onChange={(e) => setFormData(prev => ({ ...prev, budget: e.target.value }))}
-                placeholder="e.g. ₹4.5 Cr - ₹5.5 Cr"
+                placeholder="e.g. Oct 15 - Oct 20"
                 className="form-input"
               />
             </div>

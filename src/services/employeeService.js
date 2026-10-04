@@ -1,7 +1,7 @@
 // Employee Management Service (White-Collar & Marketing Staff)
 
-const EMPLOYEES_STORAGE_KEY = 'maytri_employees_db_v1';
-const CHANNEL_NAME = 'maytri_leads_sync_channel';
+const EMPLOYEES_STORAGE_KEY = 'edion_royal_employees_db_v1';
+const CHANNEL_NAME = 'edion_royal_leads_sync_channel';
 
 import { API_BASE_URL } from './apiConfig';
 

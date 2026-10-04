@@ -1,4 +1,4 @@
-// Centralized API Configuration for Admin App
+// Centralized API Configuration for Edion Royal Guesthouse Admin App
 
 export const getApiBaseUrl = () => {
   const envUrl = (typeof process !== 'undefined' && process.env?.REACT_APP_API_URL) || 
@@ -12,11 +12,11 @@ export const getApiBaseUrl = () => {
   if (typeof window !== 'undefined') {
     const hostname = window.location.hostname;
     if (hostname === 'localhost' || hostname === '127.0.0.1') {
-      return 'http://localhost:5000/api';
+      return 'http://localhost:5001/api';
     }
   }
 
-  return 'https://api.maytriambhuja.in/api';
+  return 'http://localhost:5001/api';
 };
 
 export const API_BASE_URL = getApiBaseUrl();
@@ -39,7 +39,7 @@ export const getWebsiteUrl = (contentData = null) => {
   if (typeof window !== 'undefined') {
     const hostname = window.location.hostname;
     if (hostname === 'localhost' || hostname === '127.0.0.1') {
-      return 'http://localhost:3000';
+      return 'http://localhost:5173';
     }
   }
 
@@ -48,6 +48,5 @@ export const getWebsiteUrl = (contentData = null) => {
     return custom.startsWith('http') ? custom : `https://${custom}`;
   }
 
-  return 'https://www.maytriambhuja.in';
+  return 'http://localhost:5173';
 };
-

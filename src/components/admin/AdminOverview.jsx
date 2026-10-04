@@ -98,7 +98,7 @@ export default function AdminOverview({ leads, employees, callLogs, emailLogs, o
       </div>
 
       {/* Grid: Staff Leaderboard & Quick Logs */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '1.5rem' }}>
+      <div className="overview-grid">
         {/* Employee Leaderboard Card */}
         <div className="table-card">
           <div className="table-header-meta">
@@ -119,17 +119,9 @@ export default function AdminOverview({ leads, employees, callLogs, emailLogs, o
               {employeePerformance.map((emp, index) => (
                 <div 
                   key={emp.id}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    padding: '0.85rem 1rem',
-                    background: '#f8fafc',
-                    border: '1px solid var(--border-subtle)',
-                    borderRadius: '10px'
-                  }}
+                  className="leaderboard-row"
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+                  <div className="leaderboard-left">
                     <span style={{ fontSize: '1.35rem' }}>{emp.avatar || '💼'}</span>
                     <div>
                       <div style={{ fontWeight: 700, color: '#0f172a', fontSize: '0.9rem' }}>
@@ -142,7 +134,7 @@ export default function AdminOverview({ leads, employees, callLogs, emailLogs, o
                     </div>
                   </div>
 
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem', textAlign: 'right' }}>
+                  <div className="leaderboard-right">
                     <div>
                       <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#15803d' }}>
                         {emp.callsDone} Calls

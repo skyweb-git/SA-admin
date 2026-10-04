@@ -73,8 +73,17 @@ export default function LeadsMasterTable({
 
   const getCleanPhone = (phoneStr) => {
     if (!phoneStr) return '';
-    const clean = phoneStr.replace(/[^0-9]/g, '');
-    return clean.length === 10 ? '91' + clean : clean;
+    let clean = phoneStr.replace(/[^0-9]/g, '');
+    if (clean.startsWith('0') && clean.length === 10) {
+      return '27' + clean.slice(1);
+    }
+    if (clean.length === 9) {
+      return '27' + clean;
+    }
+    if (clean.length === 10 && !clean.startsWith('27')) {
+      return '27' + clean;
+    }
+    return clean;
   };
 
   return (
@@ -157,7 +166,7 @@ export default function LeadsMasterTable({
                   const statusInfo = STATUS_CONFIG[lead.status] || { label: lead.status, className: 'status-new' };
                   const cleanPhone = getCleanPhone(lead.phone);
                   const whatsappMessage = encodeURIComponent(
-                    `Hello ${lead.fullName || 'Sir/Madam'}, greeting from Maytri Ambhuja Executive Desk. We received your villa enquiry.`
+                    `Hello ${lead.fullName || 'Guest'}, greetings from Edion Royal Guesthouse, Milnerton, Cape Town. We received your reservation enquiry for ${lead.unitInterest || 'our rooms'}.`
                   );
 
                   return (

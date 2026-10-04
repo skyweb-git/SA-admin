@@ -85,7 +85,7 @@ export default function EmployeeTimeMonitoringView({ employees = [], callLogs = 
   const formatTimeStr = (isoString) => {
     if (!isoString) return '—';
     try {
-      return new Date(isoString).toLocaleTimeString('en-IN', {
+      return new Date(isoString).toLocaleTimeString('en-ZA', {
         hour: '2-digit',
         minute: '2-digit',
         hour12: true

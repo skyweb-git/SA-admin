@@ -37,9 +37,9 @@ export default function LoginView({ onLoginSuccess, employees = [] }) {
   const [emailChangeStep, setEmailChangeStep] = useState(1); // 1 = Request OTP, 2 = Verify OTP & Update Email
   const [isOtpMode, setIsOtpMode] = useState(false);
   
-  // Admin Login States (default jpmaytrigroup@gmail.com)
-  const [adminEmail, setAdminEmail] = useState('jpmaytrigroup@gmail.com');
-  const [adminPassword, setAdminPassword] = useState('');
+  // Admin Login States (default edionroyal@gmail.com)
+  const [adminEmail, setAdminEmail] = useState('edionroyal@gmail.com');
+  const [adminPassword, setAdminPassword] = useState('admin123');
   
   // Admin Email Change States
   const [currentAdminPasscode, setCurrentAdminPasscode] = useState('');
@@ -61,7 +61,7 @@ export default function LoginView({ onLoginSuccess, employees = [] }) {
   const [successMessage, setSuccessMessage] = useState('');
 
   // Active target email for OTP verification
-  const [activeTargetEmail, setActiveTargetEmail] = useState('jpmaytrigroup@gmail.com');
+  const [activeTargetEmail, setActiveTargetEmail] = useState('edionroyal@gmail.com');
 
   // Login OTP states
   const [otpValue, setOtpValue] = useState('');
@@ -139,7 +139,7 @@ export default function LoginView({ onLoginSuccess, employees = [] }) {
 
     const isAdm = loginRole === 'admin';
     const emailToUse = isAdm 
-      ? ((adminEmail || '').trim() || 'jpmaytrigroup@gmail.com')
+      ? ((adminEmail || '').trim() || 'edionroyal@gmail.com')
       : (employeeEmail || '').trim();
     const passToUse = isAdm ? adminPassword.trim() : employeePassword.trim();
 
@@ -184,7 +184,7 @@ export default function LoginView({ onLoginSuccess, employees = [] }) {
       return;
     }
 
-    const targetEmail = activeTargetEmail || (loginRole === 'admin' ? 'jpmaytrigroup@gmail.com' : employeeEmail);
+    const targetEmail = activeTargetEmail || (loginRole === 'admin' ? 'edionroyal@gmail.com' : employeeEmail);
 
     setOtpLoading(true);
     setError('');
@@ -207,7 +207,7 @@ export default function LoginView({ onLoginSuccess, employees = [] }) {
   // Resend OTP
   const handleResendOtp = async () => {
     if (resendCountdown > 0 || resendLoading) return;
-    const targetEmail = activeTargetEmail || (loginRole === 'admin' ? 'jpmaytrigroup@gmail.com' : employeeEmail);
+    const targetEmail = activeTargetEmail || (loginRole === 'admin' ? 'edionroyal@gmail.com' : employeeEmail);
     
     setResendLoading(true);
     setError('');
@@ -330,7 +330,7 @@ export default function LoginView({ onLoginSuccess, employees = [] }) {
     setError('');
     setSuccessMessage('');
 
-    const currEmail = (adminEmail || '').trim() || 'jpmaytrigroup@gmail.com';
+    const currEmail = (adminEmail || '').trim() || 'edionroyal@gmail.com';
     const currPass = currentAdminPasscode.trim();
     const newMail = newAdminEmail.trim();
 
@@ -369,7 +369,7 @@ export default function LoginView({ onLoginSuccess, employees = [] }) {
     setError('');
     setSuccessMessage('');
 
-    const currEmail = (adminEmail || '').trim() || 'jpmaytrigroup@gmail.com';
+    const currEmail = (adminEmail || '').trim() || 'edionroyal@gmail.com';
     const newMail = newAdminEmail.trim();
     const otp = emailChangeOtp.trim();
 
@@ -402,7 +402,7 @@ export default function LoginView({ onLoginSuccess, employees = [] }) {
 
   const handleResendEmailChangeOtp = async () => {
     if (emailChangeCountdown > 0 || emailChangeOtpLoading) return;
-    const currEmail = (adminEmail || '').trim() || 'jpmaytrigroup@gmail.com';
+    const currEmail = (adminEmail || '').trim() || 'edionroyal@gmail.com';
     setEmailChangeOtpLoading(true);
     setError('');
     setSuccessMessage('');
@@ -428,15 +428,22 @@ export default function LoginView({ onLoginSuccess, employees = [] }) {
       <div className="login-card">
         {/* Brand Header */}
         <div className="login-header">
-          <div className="login-brand-icon" style={{ background: 'transparent', padding: 0, width: 'auto', height: 'auto', marginBottom: '0.75rem' }}>
-            <img
-              src="/ambhuja-logo-dark.png"
-              alt="Maytri Ambhuja"
-              style={{ height: '70px', width: 'auto', maxWidth: '220px', objectFit: 'contain' }}
-            />
+          <div className="login-brand-icon" style={{ 
+            background: 'linear-gradient(135deg, #1d4ed8, #2563eb)', 
+            width: '64px', 
+            height: '64px', 
+            borderRadius: '16px',
+            margin: '0 auto 0.75rem',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: '#ffffff',
+            boxShadow: '0 8px 20px rgba(37, 99, 235, 0.35)'
+          }}>
+            <Building2 size={32} strokeWidth={2.4} />
           </div>
-          <h1 className="login-brand-title">MAYTRI AMBHUJA</h1>
-          <p className="login-brand-tagline">Maytri Ambhuja CRM &amp; Admin Portal</p>
+          <h1 className="login-brand-title">EDION ROYAL</h1>
+          <p className="login-brand-tagline">Guesthouse Milnerton · Admin &amp; Reservations Portal</p>
         </div>
 
         {/* Role Selector Tabs (Admin vs Employee) */}
@@ -486,7 +493,7 @@ export default function LoginView({ onLoginSuccess, employees = [] }) {
               'Enter your registered email address to set or update your password.'
             ) : loginRole === 'admin' ? (
               <>
-                Enter your admin passcode below. A one-time verification OTP will be sent directly to <strong style={{ color: '#000' }}>{adminEmail || 'jpmaytrigroup@gmail.com'}</strong>.
+                Enter your admin passcode below. A one-time verification OTP will be sent directly to <strong style={{ color: '#000' }}>{adminEmail || 'edionroyal@gmail.com'}</strong>.
               </>
             ) : (
               'Enter your registered work email and password. A verification OTP will be sent directly to your email.'
@@ -673,7 +680,7 @@ export default function LoginView({ onLoginSuccess, employees = [] }) {
                         required
                         value={resetEmail}
                         onChange={(e) => setResetEmail(e.target.value)}
-                        placeholder="jpmaytrigroup@gmail.com"
+                        placeholder="edionroyal@gmail.com"
                         className="form-input login-input"
                         autoFocus
                       />
@@ -863,7 +870,7 @@ export default function LoginView({ onLoginSuccess, employees = [] }) {
                         type="email"
                         value={adminEmail}
                         onChange={(e) => setAdminEmail(e.target.value)}
-                        placeholder="jpmaytrigroup@gmail.com"
+                        placeholder="edionroyal@gmail.com"
                         className="form-input login-input"
                         required
                       />
@@ -1101,7 +1108,7 @@ export default function LoginView({ onLoginSuccess, employees = [] }) {
                       setSecuritySubTab('reset');
                       setResetStep(1);
                       setEmailChangeStep(1);
-                      setResetEmail(adminEmail || 'jpmaytrigroup@gmail.com');
+                      setResetEmail(adminEmail || 'edionroyal@gmail.com');
                       setIsSecurityMode(true);
                     }}
                     style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', fontSize: '0.85rem', fontWeight: 500 }}
@@ -1126,7 +1133,7 @@ export default function LoginView({ onLoginSuccess, employees = [] }) {
                       required
                       value={employeeEmail}
                       onChange={(e) => setEmployeeEmail(e.target.value)}
-                      placeholder="e.g. employee@maytri.com"
+                      placeholder="e.g. staff@edionroyal.co.za"
                       className="form-input login-input"
                       autoComplete="email"
                       autoFocus
@@ -1202,7 +1209,7 @@ export default function LoginView({ onLoginSuccess, employees = [] }) {
         )}
 
         <div className="login-footer-note">
-          <span>Protected Real Estate Portal • Telangana RERA P02400007647</span>
+          <span>Protected Hospitality Portal • Edion Royal Guesthouse, Milnerton, Cape Town</span>
         </div>
       </div>
     </div>

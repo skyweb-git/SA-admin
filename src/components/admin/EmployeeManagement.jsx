@@ -126,26 +126,28 @@ export default function EmployeeManagement({
   return (
     <div className="flex flex-col gap-6">
       {/* Navigation Sub-Tabs */}
-      <div style={{ display: 'flex', gap: '0.75rem', background: '#f8fafc', padding: '0.5rem', borderRadius: '10px', border: '1px solid var(--border-subtle)' }}>
-        <button
-          type="button"
-          className={`btn ${subTab === 'roster' ? 'btn-primary' : 'btn-secondary'}`}
-          onClick={() => setSubTab('roster')}
-          style={{ padding: '0.5rem 1.25rem', fontWeight: 700 }}
-        >
-          <UserCheck size={16} />
-          <span>Staff Roster &amp; Credentials</span>
-        </button>
+      <div className="subnav-bar">
+        <div className="subnav-buttons">
+          <button
+            type="button"
+            className={`btn ${subTab === 'roster' ? 'btn-primary' : 'btn-secondary'} btn-sm`}
+            onClick={() => setSubTab('roster')}
+            style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}
+          >
+            <UserCheck size={16} />
+            <span>Staff Roster &amp; Credentials</span>
+          </button>
 
-        <button
-          type="button"
-          className={`btn ${subTab === 'monitoring' ? 'btn-primary' : 'btn-secondary'}`}
-          onClick={() => setSubTab('monitoring')}
-          style={{ padding: '0.5rem 1.25rem', fontWeight: 700 }}
-        >
-          <Clock size={16} />
-          <span>Real-time Time &amp; Activity Monitor</span>
-        </button>
+          <button
+            type="button"
+            className={`btn ${subTab === 'monitoring' ? 'btn-primary' : 'btn-secondary'} btn-sm`}
+            onClick={() => setSubTab('monitoring')}
+            style={{ display: 'flex', alignItems: 'center', gap: '0.45rem' }}
+          >
+            <Clock size={16} />
+            <span>Real-time Time &amp; Activity Monitor</span>
+          </button>
+        </div>
       </div>
 
       {subTab === 'monitoring' ? (
@@ -346,7 +348,7 @@ export default function EmployeeManagement({
                     <input
                       type="text"
                       required
-                      placeholder="e.g. Suresh Kumar"
+                      placeholder="e.g. Johan Smith"
                       value={formData.name}
                       onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                       className="form-input"
@@ -372,7 +374,7 @@ export default function EmployeeManagement({
                     <input
                       type="email"
                       required
-                      placeholder="suresh@maytri.com"
+                      placeholder="staff@edionroyal.co.za"
                       value={formData.email}
                       onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
                       className="form-input"
@@ -397,7 +399,7 @@ export default function EmployeeManagement({
                     <label className="form-label">Phone Number</label>
                     <input
                       type="tel"
-                      placeholder="+91 98765 43210"
+                      placeholder="+27 78 972 4254"
                       value={formData.phone}
                       onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
                       className="form-input"

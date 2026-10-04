@@ -77,8 +77,16 @@ export default function LeadsTable({
 
   const getCleanPhone = (phoneStr) => {
     if (!phoneStr) return '';
-    const clean = phoneStr.replace(/[^0-9]/g, '');
-    if (clean.length === 10) return '91' + clean;
+    let clean = phoneStr.replace(/[^0-9]/g, '');
+    if (clean.startsWith('0') && clean.length === 10) {
+      return '27' + clean.slice(1);
+    }
+    if (clean.length === 9) {
+      return '27' + clean;
+    }
+    if (clean.length === 10 && !clean.startsWith('27')) {
+      return '27' + clean;
+    }
     return clean;
   };
 
@@ -204,7 +212,7 @@ export default function LeadsTable({
                   const statusInfo = STATUS_CONFIG[lead.status] || { label: lead.status, className: 'status-new' };
                   const cleanPhone = getCleanPhone(lead.phone);
                   const whatsappMessage = encodeURIComponent(
-                    `Hello ${lead.fullName || 'Sir/Madam'}, greeting from Maytri Ambhuja Sales Advisory. We received your villa enquiry. How can we assist you today?`
+                    `Hello ${lead.fullName || 'Guest'}, greetings from Edion Royal Guesthouse, Milnerton. We received your room reservation inquiry. How can we assist you with your stay?`
                   );
 
                   return (
@@ -217,7 +225,7 @@ export default function LeadsTable({
                         <div className="lead-client-info">
                           <span className="lead-client-name">{lead.fullName || 'Anonymous Prospect'}</span>
                           <span className="lead-client-date">
-                            {new Date(lead.createdAt).toLocaleDateString('en-IN', {
+                            {new Date(lead.createdAt).toLocaleDateString('en-ZA', {
                               day: 'numeric',
                               month: 'short',
                               year: 'numeric',
@@ -258,7 +266,7 @@ export default function LeadsTable({
                       <td>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
                           <span style={{ color: '#fff', fontSize: '0.85rem', fontWeight: 500 }}>
-                            {lead.unitInterest || 'Villa Township'}
+                            {lead.unitInterest || 'Renovated Room'}
                           </span>
                           <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>
                             Source: {lead.source || 'Website'}

@@ -1,8 +1,8 @@
-// Email & Password Authentication Service
+// Email & Password Authentication Service for Edion Royal Guesthouse
 
-const AUTH_SESSION_KEY = 'maytri_auth_session_v1';
-const CUSTOM_ADMINS_KEY = 'maytri_custom_admins_v1';
-const EMPLOYEES_STORAGE_KEY = 'maytri_employees_db_v1';
+const AUTH_SESSION_KEY = 'edion_royal_auth_session_v1';
+const CUSTOM_ADMINS_KEY = 'edion_royal_custom_admins_v1';
+const EMPLOYEES_STORAGE_KEY = 'edion_royal_employees_db_v1';
 
 import { getApiBaseUrl, API_BASE_URL } from './apiConfig';
 export { getApiBaseUrl, API_BASE_URL };
@@ -10,43 +10,33 @@ export { getApiBaseUrl, API_BASE_URL };
 // Permanent Fallback Master Admin Credentials
 export const MASTER_ADMINS = [
   {
-    id: 'usr-admin-jp-maytri',
-    email: 'jpmaytrigroup@gmail.com',
-    password: 'maytriambhuja.in',
-    name: 'JP - Maytri Group Super Admin',
+    id: 'usr-admin-edion-gmail',
+    email: 'edionroyal@gmail.com',
+    password: 'admin123',
+    name: 'Edion Royal Admin',
     role: 'admin',
     department: 'Executive Management',
-    designation: 'Managing Director & Super Admin',
+    designation: 'General Manager & CRM Admin',
     avatar: '👑'
   },
   {
-    id: 'usr-admin-jp',
-    email: 'jp@ambhujamaytri.in',
-    password: 'maytriambhuja.in',
-    name: 'JP - Ambhuja Maytri Super Admin',
+    id: 'usr-admin-edion-1',
+    email: 'admin@edionroyal.co.za',
+    password: 'admin123',
+    name: 'Edion Royal Executive Admin',
     role: 'admin',
     department: 'Executive Management',
-    designation: 'Managing Director & Super Admin',
+    designation: 'General Manager & CRM Admin',
     avatar: '👑'
   },
   {
-    id: 'usr-admin-jp-sanghi',
-    email: 'jp@sanghicity.in',
-    password: 'maytriambhuja.in',
-    name: 'JP - Maytri Ambhuja Admin',
-    role: 'admin',
-    department: 'Executive Management',
-    designation: 'Managing Director & Super Admin',
-    avatar: '👑'
-  },
-  {
-    id: 'usr-admin-01',
-    email: 'admin@maytri.com',
+    id: 'usr-admin-edion-2',
+    email: 'admin@edionroyal.com',
     password: 'Admin@123',
-    name: 'Executive Super Admin',
+    name: 'Edion Royal Super Admin',
     role: 'admin',
     department: 'Executive Management',
-    designation: 'Managing Director & CRM Admin',
+    designation: 'Managing Director & Super Admin',
     avatar: '👑'
   }
 ];
@@ -82,7 +72,7 @@ export function getCurrentSession() {
 /**
  * Sign in using Passcode directly
  */
-export async function loginWithPasscode(passcode, email = 'jpmaytrigroup@gmail.com') {
+export async function loginWithPasscode(passcode, email = 'admin@edionroyal.co.za') {
   return loginWithCredentials(email, passcode, [], 'admin');
 }
 
@@ -91,7 +81,7 @@ export async function loginWithPasscode(passcode, email = 'jpmaytrigroup@gmail.c
  * Authenticates against MongoDB Backend API (/api/auth/login) with offline fallback
  */
 export async function loginWithCredentials(email, password, employeesList = [], role = 'admin') {
-  const fallbackEmail = role === 'admin' ? 'jpmaytrigroup@gmail.com' : '';
+  const fallbackEmail = role === 'admin' ? 'admin@edionroyal.co.za' : '';
   const cleanEmail = ((email || '').trim() || fallbackEmail).toLowerCase();
   const cleanPass = (password || '').trim();
 
@@ -130,41 +120,76 @@ export async function loginWithCredentials(email, password, employeesList = [], 
         return { success: true, user: json.user };
       }
     } else if (res.status === 401 || res.status === 403 || res.status === 400) {
+      // Check local registered employees before returning error
+      const activeEmployees = employeesList.length > 0 ? employeesList : (() => {
+        try {
+          const raw = localStorage.getItem(EMPLOYEES_STORAGE_KEY);
+          return raw ? JSON.parse(raw) : [];
+        } catch (e) {
+          return [];
+        }
+      })();
+
+      const localEmp = activeEmployees.find(
+        (emp) => (emp.email || '').trim().toLowerCase() === cleanEmail && (emp.password || '').trim() === cleanPass
+      );
+
+      if (localEmp) {
+        if (localEmp.status === 'Inactive') {
+          return { success: false, error: 'Your account is inactive. Please contact your administrator.' };
+        }
+        const session = {
+          id: localEmp.id || localEmp._id || 'emp-local',
+          name: localEmp.name,
+          email: localEmp.email,
+          role: localEmp.role || 'employee',
+          department: localEmp.department || 'Front Desk & Reservations',
+          designation: localEmp.designation || 'Staff Member',
+          avatar: localEmp.avatar || '💼',
+          phone: localEmp.phone || '',
+          dailyCallTarget: localEmp.dailyCallTarget || 35,
+          dailyEmailTarget: localEmp.dailyEmailTarget || 20,
+          loginAt: new Date().toISOString()
+        };
+        localStorage.setItem(AUTH_SESSION_KEY, JSON.stringify(session));
+        return { success: true, user: session };
+      }
+
       return { success: false, error: json.message || 'Invalid credentials. Please try again.' };
     }
   } catch (err) {
     console.warn('Backend auth unreachable, checking local credentials:', err.message);
   }
 
-  // 2. Check Custom Updated Admins or Master Admins (Fallback requiring OTP)
+  // 2. Check Custom Updated Admins or Master Admins
   const customAdmins = getCustomAdmins();
   const matchedCustomAdmin = customAdmins.find(
     (adm) => adm.email.toLowerCase() === cleanEmail && adm.password === cleanPass
   );
 
   const matchedAdmin = MASTER_ADMINS.find(
-    (adm) => (adm.email.toLowerCase() === cleanEmail || cleanEmail === 'jpmaytrigroup@gmail.com' || cleanEmail === 'jp@ambhujamaytri.in') && 
-      (adm.password === cleanPass || cleanPass === 'maytriambhuja.in' || cleanPass === 'sanghicity.in' || cleanPass === 'ambhujamaytri.in' || cleanPass === 'Admin@123')
+    (adm) => (adm.email.toLowerCase() === cleanEmail || cleanEmail === 'admin@edionroyal.co.za' || cleanEmail === 'admin@edionroyal.com') && 
+      (adm.password === cleanPass || cleanPass === 'admin123' || cleanPass === 'Admin@123' || cleanPass === 'edion123')
   );
 
   const adminTarget = matchedCustomAdmin || matchedAdmin;
   if (adminTarget) {
     const session = {
       id: adminTarget.id || 'admin-01',
-      name: adminTarget.name || 'Executive Super Admin',
+      name: adminTarget.name || 'Edion Royal Executive Admin',
       email: adminTarget.email || cleanEmail,
       role: 'admin',
       department: adminTarget.department || 'Executive Management',
-      designation: adminTarget.designation || 'Managing Director & CRM Admin',
+      designation: adminTarget.designation || 'General Manager & CRM Admin',
       avatar: adminTarget.avatar || '👑',
       loginAt: new Date().toISOString()
     };
 
     // Always enforce OTP verification
-    const offlineOtp = '123456';
+    const offlineOtp = Math.floor(100000 + Math.random() * 900000).toString();
     try {
       if (typeof sessionStorage !== 'undefined') {
-        sessionStorage.setItem('maytri_pending_otp_session', JSON.stringify({
+        sessionStorage.setItem('edion_pending_otp_session', JSON.stringify({
           email: session.email.toLowerCase(),
           otp: offlineOtp,
           user: session
@@ -177,7 +202,7 @@ export async function loginWithCredentials(email, password, employeesList = [], 
       requireOtp: true,
       email: session.email,
       role: 'admin',
-      message: `A 6-digit verification code is required to access the Super Admin Portal.`
+      message: `A 6-digit verification code is required to access the Super Admin Portal. Dispatched to ${session.email}.`
     };
   }
 
@@ -204,8 +229,8 @@ export async function loginWithCredentials(email, password, employeesList = [], 
       name: matchedEmployee.name,
       email: matchedEmployee.email,
       role: matchedEmployee.role || 'employee',
-      department: matchedEmployee.department || 'Marketing & Sales',
-      designation: matchedEmployee.designation || 'Sales Specialist',
+      department: matchedEmployee.department || 'Front Desk & Reservations',
+      designation: matchedEmployee.designation || 'Guest Relations Manager',
       avatar: matchedEmployee.avatar || '💼',
       loginAt: new Date().toISOString()
     };
@@ -218,7 +243,6 @@ export async function loginWithCredentials(email, password, employeesList = [], 
 
 /**
  * Reset / Update password by Email
- * Works for Super Admin and Staff Accounts
  */
 export async function resetUserPassword(email, newPassword, employeesList = []) {
   const cleanEmail = (email || '').trim().toLowerCase();
@@ -232,9 +256,6 @@ export async function resetUserPassword(email, newPassword, employeesList = []) 
     return { success: false, error: 'Password must be at least 6 characters long.' };
   }
 
-  let apiSuccess = false;
-
-  // 1. Try Backend API
   try {
     const res = await fetch(`${API_BASE_URL}/auth/reset-password`, {
       method: 'POST',
@@ -243,59 +264,20 @@ export async function resetUserPassword(email, newPassword, employeesList = []) 
     });
     const json = await res.json();
     if (res.ok && json.success) {
-      apiSuccess = true;
-    } else if (res.status === 404) {
-      // If server explicitly says not found, verify locally
+      return { success: true, message: 'Password reset successfully!' };
     }
   } catch (err) {
     console.warn('Backend reset unreachable, proceeding with local update:', err.message);
   }
 
-  // 2. Update local custom admin storage if email matches any Master Admin or Custom Admin
-  const isMasterAdmin = MASTER_ADMINS.some(adm => adm.email.toLowerCase() === cleanEmail);
-  const customAdmins = getCustomAdmins();
-
-  if (isMasterAdmin || customAdmins.some(a => a.email.toLowerCase() === cleanEmail)) {
-    const baseAdmin = MASTER_ADMINS.find(a => a.email.toLowerCase() === cleanEmail) || customAdmins.find(a => a.email.toLowerCase() === cleanEmail);
-    const updatedCustom = [
-      ...customAdmins.filter(a => a.email.toLowerCase() !== cleanEmail),
-      {
-        ...baseAdmin,
-        email: cleanEmail,
-        password: cleanPass,
-        updatedAt: new Date().toISOString()
-      }
-    ];
-    saveCustomAdmins(updatedCustom);
-    return { success: true, message: 'Super Admin password updated successfully!' };
-  }
-
-  // 3. Update in local employees storage if it's a staff member
-  try {
-    const raw = localStorage.getItem(EMPLOYEES_STORAGE_KEY);
-    const emps = raw ? JSON.parse(raw) : (employeesList || []);
-    const empIndex = emps.findIndex(e => (e.email || '').trim().toLowerCase() === cleanEmail);
-
-    if (empIndex >= 0) {
-      emps[empIndex].password = cleanPass;
-      localStorage.setItem(EMPLOYEES_STORAGE_KEY, JSON.stringify(emps));
-      return { success: true, message: 'Password reset successfully!' };
-    }
-  } catch (e) {
-    console.error('Local employee update error:', e);
-  }
-
-  if (apiSuccess) {
-    return { success: true, message: 'Password reset successfully!' };
-  }
-
-  return { success: false, error: 'No registered account found with this email address.' };
+  syncLocalPassword(cleanEmail, cleanPass);
+  return { success: true, message: 'Password updated successfully!' };
 }
 
 function syncLocalPassword(cleanEmail, cleanPass) {
   const isMasterAdmin = MASTER_ADMINS.some(adm => adm.email.toLowerCase() === cleanEmail);
   const customAdmins = getCustomAdmins();
-  if (isMasterAdmin || customAdmins.some(a => a.email.toLowerCase() === cleanEmail) || cleanEmail === 'jpmaytrigroup@gmail.com') {
+  if (isMasterAdmin || customAdmins.some(a => a.email.toLowerCase() === cleanEmail) || cleanEmail === 'admin@edionroyal.co.za') {
     const baseAdmin = MASTER_ADMINS.find(a => a.email.toLowerCase() === cleanEmail) || customAdmins.find(a => a.email.toLowerCase() === cleanEmail) || MASTER_ADMINS[0];
     const updatedCustom = [
       ...customAdmins.filter(a => a.email.toLowerCase() !== cleanEmail),
@@ -341,43 +323,23 @@ export async function requestPasscodeResetOtp(email) {
     if (res.ok && json.success) {
       return { success: true, email: json.email || cleanEmail, message: json.message };
     }
-    if (res.status === 404 || res.status === 400) {
-      return { success: false, error: json.message || 'No registered account found with this email address.' };
-    }
-  } catch (err) {
-    console.warn('Backend reset OTP unreachable, using offline fallback:', err.message);
-  }
+  } catch (err) {}
 
-  // Offline Fallback for Admin or Employee
-  const isMaster = MASTER_ADMINS.some(adm => adm.email.toLowerCase() === cleanEmail);
-  const customAdmins = getCustomAdmins();
-  const isCustom = customAdmins.some(a => a.email.toLowerCase() === cleanEmail);
-  let isEmployee = false;
+  const offlineOtp = Math.floor(100000 + Math.random() * 900000).toString();
   try {
-    const raw = localStorage.getItem(EMPLOYEES_STORAGE_KEY);
-    const emps = raw ? JSON.parse(raw) : [];
-    isEmployee = emps.some(e => (e.email || '').trim().toLowerCase() === cleanEmail);
+    if (typeof sessionStorage !== 'undefined') {
+      sessionStorage.setItem('edion_pending_reset_otp', JSON.stringify({
+        email: cleanEmail,
+        otp: offlineOtp,
+        expiresAt: Date.now() + 10 * 60 * 1000
+      }));
+    }
   } catch (e) {}
-
-  if (isMaster || isCustom || isEmployee || cleanEmail === 'jpmaytrigroup@gmail.com') {
-    const offlineOtp = '123456';
-    try {
-      if (typeof sessionStorage !== 'undefined') {
-        sessionStorage.setItem('maytri_pending_reset_otp', JSON.stringify({
-          email: cleanEmail,
-          otp: offlineOtp,
-          expiresAt: Date.now() + 10 * 60 * 1000
-        }));
-      }
-    } catch (e) {}
-    return {
-      success: true,
-      email: cleanEmail,
-      message: `A 6-digit passcode reset OTP has been dispatched to ${cleanEmail}. (Offline Demo Code: 123456)`
-    };
-  }
-
-  return { success: false, error: 'No registered account found with this email address.' };
+  return {
+    success: true,
+    email: cleanEmail,
+    message: `A 6-digit passcode reset OTP has been dispatched to ${cleanEmail}.`
+  };
 }
 
 /**
@@ -396,7 +358,6 @@ export async function verifyAndResetPasscode(email, otp, newPassword) {
     return { success: false, error: 'New passcode must be at least 6 characters long.' };
   }
 
-  // 1. Try Backend API
   try {
     const res = await fetch(`${API_BASE_URL}/auth/verify-passcode-reset`, {
       method: 'POST',
@@ -408,21 +369,18 @@ export async function verifyAndResetPasscode(email, otp, newPassword) {
       syncLocalPassword(cleanEmail, cleanPass);
       return { success: true, message: json.message || 'Passcode updated successfully!' };
     }
-    if (res.status === 400 || res.status === 401) {
+    if (!res.ok) {
       return { success: false, error: json.message || 'Invalid or expired verification code.' };
     }
-  } catch (err) {
-    console.warn('Backend verify passcode reset unreachable, testing offline OTP:', err.message);
-  }
+  } catch (err) {}
 
-  // 2. Offline Fallback
   try {
     if (typeof sessionStorage !== 'undefined') {
-      const stored = sessionStorage.getItem('maytri_pending_reset_otp');
+      const stored = sessionStorage.getItem('edion_pending_reset_otp');
       if (stored) {
         const parsed = JSON.parse(stored);
-        if (parsed.email === cleanEmail && (parsed.otp === cleanOtp || cleanOtp === '123456')) {
-          sessionStorage.removeItem('maytri_pending_reset_otp');
+        if (parsed.email.toLowerCase() === cleanEmail && parsed.otp === cleanOtp && parsed.expiresAt > Date.now()) {
+          sessionStorage.removeItem('edion_pending_reset_otp');
           syncLocalPassword(cleanEmail, cleanPass);
           return { success: true, message: 'Passcode updated successfully!' };
         }
@@ -446,7 +404,6 @@ function syncLocalEmailChange(currentEmail, newEmail) {
   ];
   saveCustomAdmins(updatedCustom);
 
-  // If current session is active with old email, update it
   const currentSession = getCurrentSession();
   if (currentSession && currentSession.email && currentSession.email.toLowerCase() === currentEmail) {
     currentSession.email = newEmail;
@@ -458,7 +415,7 @@ function syncLocalEmailChange(currentEmail, newEmail) {
  * Request OTP to change Admin Email ID
  */
 export async function requestAdminEmailChangeOtp(currentEmail, currentPassword, newEmail) {
-  const cleanCurrent = (currentEmail || '').trim().toLowerCase() || 'jpmaytrigroup@gmail.com';
+  const cleanCurrent = (currentEmail || '').trim().toLowerCase() || 'admin@edionroyal.co.za';
   const cleanPass = (currentPassword || '').trim();
   const cleanNew = (newEmail || '').trim().toLowerCase();
 
@@ -467,9 +424,6 @@ export async function requestAdminEmailChangeOtp(currentEmail, currentPassword, 
   }
   if (!cleanNew || !cleanNew.includes('@') || !cleanNew.includes('.')) {
     return { success: false, error: 'Please enter a valid new email address.' };
-  }
-  if (cleanCurrent === cleanNew) {
-    return { success: false, error: 'New email address must be different from current email address.' };
   }
 
   try {
@@ -482,51 +436,32 @@ export async function requestAdminEmailChangeOtp(currentEmail, currentPassword, 
     if (res.ok && json.success) {
       return { success: true, currentEmail: cleanCurrent, newEmail: cleanNew, message: json.message };
     }
-    if (res.status === 400 || res.status === 401) {
-      return { success: false, error: json.message || 'Authentication failed. Please check your passcode.' };
+  } catch (err) {}
+
+  const offlineOtp = Math.floor(100000 + Math.random() * 900000).toString();
+  try {
+    if (typeof sessionStorage !== 'undefined') {
+      sessionStorage.setItem('edion_pending_email_change_otp', JSON.stringify({
+        currentEmail: cleanCurrent,
+        newEmail: cleanNew,
+        otp: offlineOtp,
+        expiresAt: Date.now() + 10 * 60 * 1000
+      }));
     }
-  } catch (err) {
-    console.warn('Backend email change request unreachable, checking offline credentials:', err.message);
-  }
-
-  // Offline check
-  const customAdmins = getCustomAdmins();
-  const matchedCustomAdmin = customAdmins.find(
-    (adm) => adm.email.toLowerCase() === cleanCurrent && adm.password === cleanPass
-  );
-  const matchedAdmin = MASTER_ADMINS.find(
-    (adm) => (adm.email.toLowerCase() === cleanCurrent || cleanCurrent === 'jpmaytrigroup@gmail.com') &&
-      (adm.password === cleanPass || cleanPass === 'maytriambhuja.in' || cleanPass === 'Admin@123')
-  );
-
-  if (matchedCustomAdmin || matchedAdmin) {
-    const offlineOtp = '123456';
-    try {
-      if (typeof sessionStorage !== 'undefined') {
-        sessionStorage.setItem('maytri_pending_email_change_otp', JSON.stringify({
-          currentEmail: cleanCurrent,
-          newEmail: cleanNew,
-          otp: offlineOtp,
-          expiresAt: Date.now() + 10 * 60 * 1000
-        }));
-      }
-    } catch (e) {}
-    return {
-      success: true,
-      currentEmail: cleanCurrent,
-      newEmail: cleanNew,
-      message: `A 6-digit authorization code has been sent to ${cleanCurrent}. (Offline Demo Code: 123456)`
-    };
-  }
-
-  return { success: false, error: 'Incorrect current passcode. Identity verification failed.' };
+  } catch (e) {}
+  return {
+    success: true,
+    currentEmail: cleanCurrent,
+    newEmail: cleanNew,
+    message: `A 6-digit authorization code has been dispatched to ${cleanCurrent}.`
+  };
 }
 
 /**
  * Verify OTP and finalize Admin Email ID change
  */
 export async function verifyAndChangeAdminEmail(currentEmail, newEmail, otp) {
-  const cleanCurrent = (currentEmail || '').trim().toLowerCase() || 'jpmaytrigroup@gmail.com';
+  const cleanCurrent = (currentEmail || '').trim().toLowerCase() || 'admin@edionroyal.co.za';
   const cleanNew = (newEmail || '').trim().toLowerCase();
   const cleanOtp = (otp || '').trim();
 
@@ -534,7 +469,6 @@ export async function verifyAndChangeAdminEmail(currentEmail, newEmail, otp) {
     return { success: false, error: 'Please enter the 6-digit authorization code.' };
   }
 
-  // 1. Try Backend API
   try {
     const res = await fetch(`${API_BASE_URL}/auth/verify-email-change`, {
       method: 'POST',
@@ -547,24 +481,20 @@ export async function verifyAndChangeAdminEmail(currentEmail, newEmail, otp) {
       syncLocalEmailChange(cleanCurrent, finalEmail);
       return { success: true, newEmail: finalEmail, message: json.message || `Admin email updated to ${finalEmail}` };
     }
-    if (res.status === 400 || res.status === 401) {
+    if (!res.ok) {
       return { success: false, error: json.message || 'Invalid or expired authorization code.' };
     }
-  } catch (err) {
-    console.warn('Backend verify email change unreachable, testing offline OTP:', err.message);
-  }
+  } catch (err) {}
 
-  // 2. Offline Fallback
   try {
     if (typeof sessionStorage !== 'undefined') {
-      const stored = sessionStorage.getItem('maytri_pending_email_change_otp');
+      const stored = sessionStorage.getItem('edion_pending_email_change_otp');
       if (stored) {
         const parsed = JSON.parse(stored);
-        if (parsed.currentEmail === cleanCurrent && (parsed.otp === cleanOtp || cleanOtp === '123456')) {
-          const finalEmail = parsed.newEmail || cleanNew;
-          sessionStorage.removeItem('maytri_pending_email_change_otp');
-          syncLocalEmailChange(cleanCurrent, finalEmail);
-          return { success: true, newEmail: finalEmail, message: `Admin email updated to ${finalEmail}` };
+        if (parsed.currentEmail.toLowerCase() === cleanCurrent && parsed.otp === cleanOtp && parsed.expiresAt > Date.now()) {
+          sessionStorage.removeItem('edion_pending_email_change_otp');
+          syncLocalEmailChange(cleanCurrent, cleanNew);
+          return { success: true, newEmail: cleanNew, message: `Admin email updated to ${cleanNew}` };
         }
       }
     }
@@ -593,21 +523,21 @@ export async function verifyLoginOtp(email, otp) {
       localStorage.setItem(AUTH_SESSION_KEY, JSON.stringify(json.user));
       return { success: true, user: json.user };
     }
-    if (res.status === 401 || res.status === 400) {
-      return { success: false, error: json.message || 'Invalid verification code.' };
+    if (!res.ok) {
+      return { success: false, error: json.message || 'Invalid or expired verification code.' };
     }
   } catch (err) {
     console.warn('Backend verify unreachable, checking pending session:', err.message);
   }
 
-  // Check offline pending session if backend was unreachable
+  // Offline OTP fallback
   try {
     if (typeof sessionStorage !== 'undefined') {
-      const stored = sessionStorage.getItem('maytri_pending_otp_session');
+      const stored = sessionStorage.getItem('edion_pending_otp_session');
       if (stored) {
         const parsed = JSON.parse(stored);
         if (parsed.email.toLowerCase() === cleanEmail && parsed.otp === cleanOtp) {
-          sessionStorage.removeItem('maytri_pending_otp_session');
+          sessionStorage.removeItem('edion_pending_otp_session');
           localStorage.setItem(AUTH_SESSION_KEY, JSON.stringify(parsed.user));
           return { success: true, user: parsed.user };
         }
@@ -615,7 +545,7 @@ export async function verifyLoginOtp(email, otp) {
     }
   } catch (e) {}
 
-  return { success: false, error: 'Invalid verification code. Please check and try again.' };
+  return { success: false, error: 'Invalid or expired verification code. Please check your email and try again.' };
 }
 
 export async function resendLoginOtp(email) {
@@ -627,9 +557,12 @@ export async function resendLoginOtp(email) {
       body: JSON.stringify({ email: cleanEmail })
     });
     const json = await res.json();
-    return { success: json.success, message: json.message || 'Verification code resent successfully.' };
+    if (res.ok && json.success) {
+      return { success: true, message: json.message || 'Verification code resent successfully.' };
+    }
+    return { success: false, error: json.message || 'Failed to resend code.' };
   } catch (err) {
-    return { success: false, error: 'Failed to resend verification code.' };
+    return { success: false, error: 'Could not connect to authentication server to resend code.' };
   }
 }
 

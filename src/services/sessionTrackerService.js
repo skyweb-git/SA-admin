@@ -1,5 +1,5 @@
 import { API_BASE_URL } from './apiConfig';
-const CURRENT_SESSION_ID_KEY = 'maytri_current_session_id_v1';
+const CURRENT_SESSION_ID_KEY = 'edion_royal_current_session_id_v1';
 
 let heartbeatTimer = null;
 let lastInteractionTime = Date.now();

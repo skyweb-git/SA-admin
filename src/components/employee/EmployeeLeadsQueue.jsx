@@ -37,7 +37,14 @@ export default function EmployeeLeadsQueue({
         (lead.message && lead.message.toLowerCase().includes(q));
 
       const assignedId = lead.assignedToId || lead.assignedTo || '';
-      const matchScope = scopeFilter === 'all' || assignedId === currentUser.id;
+      const isAssignedToMe = 
+        assignedId === currentUser.id ||
+        assignedId === currentUser._id ||
+        (lead.assignedToName && currentUser.name && lead.assignedToName.toLowerCase() === currentUser.name.toLowerCase()) ||
+        (lead.assignedEmployeeName && currentUser.name && lead.assignedEmployeeName.toLowerCase() === currentUser.name.toLowerCase()) ||
+        (!assignedId && (currentUser.id === 'emp-02' || (currentUser.name && currentUser.name.toLowerCase().includes('front desk')) || currentUser.role === 'admin'));
+
+      const matchScope = scopeFilter === 'all' || isAssignedToMe;
       const matchStatus = statusFilter === 'ALL' || lead.status === statusFilter;
 
       return matchQuery && matchScope && matchStatus;
@@ -52,8 +59,17 @@ export default function EmployeeLeadsQueue({
 
   const getCleanPhone = (phoneStr) => {
     if (!phoneStr) return '';
-    const clean = phoneStr.replace(/[^0-9]/g, '');
-    return clean.length === 10 ? '91' + clean : clean;
+    let clean = phoneStr.replace(/[^0-9]/g, '');
+    if (clean.startsWith('0') && clean.length === 10) {
+      return '27' + clean.slice(1);
+    }
+    if (clean.length === 9) {
+      return '27' + clean;
+    }
+    if (clean.length === 10 && !clean.startsWith('27')) {
+      return '27' + clean;
+    }
+    return clean;
   };
 
   return (
@@ -133,7 +149,7 @@ export default function EmployeeLeadsQueue({
                 <tr>
                   <th>Client Name &amp; Time</th>
                   <th>Contact Info</th>
-                  <th>Villa Interest</th>
+                  <th>Room Interest</th>
                   <th>Status</th>
                   <th>Calling &amp; Email Actions</th>
                   <th></th>
@@ -144,7 +160,7 @@ export default function EmployeeLeadsQueue({
                   const statusInfo = STATUS_CONFIG[lead.status] || { label: lead.status, className: 'status-new' };
                   const cleanPhone = getCleanPhone(lead.phone);
                   const whatsappMsg = encodeURIComponent(
-                    `Hello ${lead.fullName || 'Sir/Madam'}, I am ${currentUser.name} from Maytri Ambhuja Luxury Villa Township. I'm reaching out regarding your villa enquiry.`
+                    `Hello ${lead.fullName || 'Guest'}, I am ${currentUser.name} from Edion Royal Guesthouse, Milnerton. I'm reaching out regarding your room reservation enquiry.`
                   );
 
                   return (
@@ -167,7 +183,7 @@ export default function EmployeeLeadsQueue({
 
                       <td>
                         <div style={{ fontSize: '0.85rem', color: '#0f766e', fontWeight: 600 }}>
-                          {lead.unitInterest || 'Villa Township'}
+                          {lead.unitInterest || 'Renovated Room'}
                         </div>
                       </td>
 

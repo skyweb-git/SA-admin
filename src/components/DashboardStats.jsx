@@ -31,7 +31,7 @@ export default function DashboardStats({ leads }) {
           <span className="stat-value">{totalLeads}</span>
           <span className="stat-trend positive">
             <TrendingUp size={12} />
-            <span>Active Real Estate Pipeline</span>
+            <span>Active Reservations Pipeline</span>
           </span>
         </div>
       </div>
@@ -61,7 +61,7 @@ export default function DashboardStats({ leads }) {
           <span className="stat-value">{siteVisits}</span>
           <span className="stat-trend positive">
             <TrendingUp size={12} />
-            <span>Villa Township Walkthroughs</span>
+            <span>Room Viewings & Check-ins</span>
           </span>
         </div>
       </div>

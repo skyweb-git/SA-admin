@@ -108,7 +108,7 @@ export default function CallLogsView({ callLogs, employees }) {
                   <tr key={call.id}>
                     <td>
                       <div style={{ fontSize: '0.8rem', color: '#0f172a', fontWeight: 600 }}>
-                        {new Date(call.timestamp).toLocaleDateString('en-IN', {
+                        {new Date(call.timestamp).toLocaleDateString('en-ZA', {
                           day: 'numeric',
                           month: 'short',
                           hour: '2-digit',

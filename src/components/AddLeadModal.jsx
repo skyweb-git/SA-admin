@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Plus, UserPlus, Phone, Mail, Building } from 'lucide-react';
+import { X, Plus, UserPlus, Phone, Mail, BedDouble } from 'lucide-react';
 import { saveLead } from '../services/leadStorage';
 
 export default function AddLeadModal({ isOpen, onClose, onLeadAdded }) {
@@ -8,10 +8,12 @@ export default function AddLeadModal({ isOpen, onClose, onLeadAdded }) {
     phone: '',
     email: '',
     preferredMethod: 'Phone',
-    source: 'Walk-in / Direct Call',
+    source: 'Direct Phone / Walk-in',
     status: 'New',
-    unitInterest: '300 SQ YD Villa',
-    budget: '₹4.5 Cr - ₹5.5 Cr',
+    unitInterest: 'Any Room / Best Available',
+    checkIn: new Date().toISOString().split('T')[0],
+    checkOut: new Date(Date.now() + 86400000).toISOString().split('T')[0],
+    budget: '',
     message: '',
     notes: '',
     followUpDate: new Date().toISOString().split('T')[0]
@@ -26,14 +28,14 @@ export default function AddLeadModal({ isOpen, onClose, onLeadAdded }) {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.fullName.trim() || !formData.phone.trim()) {
-      setError('Full Name and Phone Number are required.');
+    if (!formData.fullName.trim() || (!formData.phone.trim() && !formData.email.trim())) {
+      setError('Guest Full Name and at least Phone or Email are required.');
       return;
     }
 
-    const newLead = saveLead(formData);
+    const newLead = await saveLead(formData);
     if (onLeadAdded) onLeadAdded(newLead);
     onClose();
   };
@@ -44,7 +46,7 @@ export default function AddLeadModal({ isOpen, onClose, onLeadAdded }) {
         <div className="modal-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <UserPlus size={20} className="text-cyan-400" />
-            <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: '#fff' }}>Add New Prospect</h3>
+            <h3 style={{ fontSize: '1.15rem', fontWeight: 700, color: '#fff' }}>Add New Reservation Enquiry</h3>
           </div>
           <button className="btn btn-secondary btn-icon" onClick={onClose}>
             <X size={16} />
@@ -61,28 +63,27 @@ export default function AddLeadModal({ isOpen, onClose, onLeadAdded }) {
 
             <div className="form-grid-2">
               <div className="form-group">
-                <label className="form-label">Prospect Name *</label>
+                <label className="form-label">Guest Full Name *</label>
                 <input
                   type="text"
                   name="fullName"
                   value={formData.fullName}
                   onChange={handleChange}
-                  placeholder="e.g. Sridhar Varma"
+                  placeholder="e.g. Sindi Mhlongo"
                   className="form-input"
                   required
                 />
               </div>
 
               <div className="form-group">
-                <label className="form-label">Phone Number *</label>
+                <label className="form-label">Phone / WhatsApp</label>
                 <input
                   type="tel"
                   name="phone"
                   value={formData.phone}
                   onChange={handleChange}
-                  placeholder="10-digit mobile number"
+                  placeholder="+27 78 123 4567"
                   className="form-input"
-                  required
                 />
               </div>
             </div>
@@ -95,7 +96,7 @@ export default function AddLeadModal({ isOpen, onClose, onLeadAdded }) {
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  placeholder="client@gmail.com"
+                  placeholder="guest@example.com"
                   className="form-input"
                 />
               </div>
@@ -124,17 +125,16 @@ export default function AddLeadModal({ isOpen, onClose, onLeadAdded }) {
                   onChange={handleChange}
                   className="form-select"
                 >
-                  <option value="Walk-in / Direct Call">Walk-in / Direct Call</option>
-                  <option value="Website Enquiry">Website Enquiry</option>
-                  <option value="Landing Page CTA Enquiry">Landing Page CTA</option>
-                  <option value="Brochure Download">Brochure Download</option>
-                  <option value="Direct WhatsApp CTA">Direct WhatsApp</option>
-                  <option value="Referral">Client Referral</option>
+                  <option value="Website Booking Form">Website Booking Form</option>
+                  <option value="Direct Phone / Walk-in">Direct Phone / Walk-in</option>
+                  <option value="WhatsApp Direct">WhatsApp Direct</option>
+                  <option value="Website Contact Form">Website Contact Form</option>
+                  <option value="Referral / Returning Guest">Referral / Returning Guest</option>
                 </select>
               </div>
 
               <div className="form-group">
-                <label className="form-label">Initial Status</label>
+                <label className="form-label">Reservation Status</label>
                 <select
                   name="status"
                   value={formData.status}
@@ -142,28 +142,31 @@ export default function AddLeadModal({ isOpen, onClose, onLeadAdded }) {
                   className="form-select"
                 >
                   <option value="New">New Enquiry</option>
-                  <option value="Contacted">Contacted</option>
-                  <option value="Site Visit Scheduled">Site Visit Scheduled</option>
-                  <option value="Negotiation">In Negotiation</option>
-                  <option value="Converted">Converted</option>
+                  <option value="Contacted">Contacted / Availability Sent</option>
+                  <option value="Confirmed">Confirmed Booking</option>
+                  <option value="Follow Up">Follow Up</option>
+                  <option value="Cancelled">Cancelled</option>
                 </select>
               </div>
             </div>
 
             <div className="form-grid-2">
               <div className="form-group">
-                <label className="form-label">Villa Configuration</label>
+                <label className="form-label">Room Type Selected</label>
                 <select
                   name="unitInterest"
                   value={formData.unitInterest}
                   onChange={handleChange}
                   className="form-select"
                 >
-                  <option value="300 SQ YD Villa (East Facing)">300 SQ YD Villa (East Facing)</option>
-                  <option value="300 SQ YD Villa (West Facing)">300 SQ YD Villa (West Facing)</option>
-                  <option value="222 SQ YD Villa (East Facing)">222 SQ YD Villa (East Facing)</option>
-                  <option value="222 SQ YD Villa (West Facing)">222 SQ YD Villa (West Facing)</option>
-                  <option value="Clubhouse & Community Info">Clubhouse & Community Info</option>
+                  <option value="Any Room / Best Available">Any Room / Best Available</option>
+                  <option value="Renovated Double Room">Renovated Double Room (2 guests)</option>
+                  <option value="Twin Room with Kitchenette">Twin Room with Kitchenette (2 guests)</option>
+                  <option value="Triple Room">Triple Room (3 guests)</option>
+                  <option value="Budget Double Room">Budget Double Room (2 guests)</option>
+                  <option value="Comfort Triple Room with Shower">Comfort Triple Room with Shower (3 guests)</option>
+                  <option value="Budget Triple Room">Budget Triple Room (3 guests)</option>
+                  <option value="Family Room">Family Room (3–4 guests)</option>
                 </select>
               </div>
 
@@ -179,26 +182,49 @@ export default function AddLeadModal({ isOpen, onClose, onLeadAdded }) {
               </div>
             </div>
 
+            <div className="form-grid-2">
+              <div className="form-group">
+                <label className="form-label">Check-in Date</label>
+                <input
+                  type="date"
+                  name="checkIn"
+                  value={formData.checkIn}
+                  onChange={handleChange}
+                  className="form-input"
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Check-out Date</label>
+                <input
+                  type="date"
+                  name="checkOut"
+                  value={formData.checkOut}
+                  onChange={handleChange}
+                  className="form-input"
+                />
+              </div>
+            </div>
+
             <div className="form-group">
-              <label className="form-label">Initial Discussion Notes</label>
+              <label className="form-label">Special Requests / Guest Notes</label>
               <textarea
-                name="notes"
-                rows={2}
-                value={formData.notes}
+                name="message"
+                value={formData.message}
                 onChange={handleChange}
-                placeholder="Key requirements, customer background, preferred visit slot..."
+                placeholder="Late arrival, extra towels, airport shuttle request..."
+                rows="2"
                 className="form-textarea"
               />
             </div>
           </div>
 
-          <div className="modal-header" style={{ borderTop: '1px solid var(--border-subtle)', borderBottom: 'none', justifyContent: 'flex-end', gap: '0.75rem' }}>
+          <div className="modal-footer">
             <button type="button" className="btn btn-secondary" onClick={onClose}>
               Cancel
             </button>
             <button type="submit" className="btn btn-primary">
-              <Plus size={16} />
-              <span>Save Prospect</span>
+              <Plus size={16} /> Save Reservation
             </button>
           </div>
         </form>

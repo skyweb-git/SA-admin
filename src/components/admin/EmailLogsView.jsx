@@ -93,7 +93,7 @@ export default function EmailLogsView({ emailLogs, employees }) {
                   <tr key={mail.id} onClick={() => setSelectedMail(mail)}>
                     <td>
                       <div style={{ fontSize: '0.8rem', color: '#0f172a', fontWeight: 600 }}>
-                        {new Date(mail.sentAt).toLocaleDateString('en-IN', {
+                        {new Date(mail.sentAt).toLocaleDateString('en-ZA', {
                           day: 'numeric',
                           month: 'short',
                           hour: '2-digit',

@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { 
   Globe, 
   Image as ImageIcon, 
-  Film, 
   Upload, 
   Save, 
   CheckCircle, 
@@ -12,44 +11,38 @@ import {
   ExternalLink,
   Edit3,
   Phone,
-  Building,
   Building2,
-  Layers,
   MapPin,
   RefreshCw,
   Eye,
-  FileText,
-  Download,
   Plus,
   Trash2,
-  ListPlus,
-  ArrowUp,
-  ArrowDown,
+  Wifi,
+  Car,
+  Clock,
+  Flame,
+  UtensilsCrossed,
   ShieldCheck,
-  Gamepad2,
-  Waves,
-  ShoppingBag,
-  Dumbbell,
-  Dices,
-  Footprints,
-  PhoneCall,
-  ArrowUpDown,
-  Trees,
-  Trophy,
-  Activity,
-  Target,
-  PartyPopper,
-  CreditCard,
-  Palette,
+  Star,
+  Plane,
+  Lock,
+  Bath,
+  Coffee,
   RotateCcw,
+  Navigation,
+  Mail,
   Check,
-  X
+  X,
+  Palette,
+  BedDouble
 } from 'lucide-react';
 import { 
   fetchContentFromAPI, 
   saveContentToAPI, 
   fetchAllMedia, 
   uploadMediaToAPI, 
+  deleteMediaFromAPI,
+  resetContentToDefault,
   DEFAULT_CONTENT 
 } from '../../services/cmsService';
 import { getWebsiteUrl } from '../../services/apiConfig';
@@ -57,34 +50,34 @@ import { getWebsiteUrl } from '../../services/apiConfig';
 const THEME_PRESETS = [
   {
     id: 'oceanic',
-    name: 'Current Site Default (Blue, Black & White)',
+    name: 'Edion Royal Classic (Royal Blue & Navy)',
     badge: 'Live Site Default',
-    previewColors: ['#0284c7', '#0b132b', '#ffffff'],
-    description: 'The authentic live site colors: Sky Blue accent (#0284c7), Midnight Black (#0b132b) & Navy headers (#111c36), and clean White surfaces (#ffffff / #f8f9fb).',
+    previewColors: ['#2563eb', '#102138', '#ffffff'],
+    description: 'The authentic live site colors: Royal Blue accent (#2563eb), Deep Navy (#102138), and clean White surfaces.',
     theme: {
-      presetName: 'Current Site Default (Blue, Black & White)',
-      accentColor: '#0284c7',
-      accentGlow: '#38bdf8',
-      accentSubtle: '#e0f2fe',
-      darkPrimary: '#0b132b',
-      darkNavy: '#111c36',
-      darkNavyLight: '#1c2847',
-      pageBg: '#f8f9fb',
+      presetName: 'Edion Royal Classic (Royal Blue & Navy)',
+      accentColor: '#2563eb',
+      accentGlow: '#60a5fa',
+      accentSubtle: '#dbeafe',
+      darkPrimary: '#0f172a',
+      darkNavy: '#102138',
+      darkNavyLight: '#1e293b',
+      pageBg: '#f8fafc',
       surfaceBg: '#ffffff',
-      surfaceSubtle: '#f1f3f7',
-      textColor: '#111c36',
-      textMuted: '#52637f',
-      borderColor: '#e2e6ed'
+      surfaceSubtle: '#f1f5f9',
+      textColor: '#102138',
+      textMuted: '#556c86',
+      borderColor: '#e2e8f0'
     }
   },
   {
     id: 'emerald',
-    name: 'Luxury Emerald & Forest',
-    badge: 'Botanical Luxury',
-    previewColors: ['#059669', '#061a14', '#ffffff'],
-    description: 'Lush royal emerald accents with forest charcoal headers and mint-tinted cards.',
+    name: 'Atlantic Coast (Emerald & Seafoam)',
+    badge: 'Coastal Relaxed',
+    previewColors: ['#059669', '#0d281e', '#ffffff'],
+    description: 'Fresh sea-spray emerald accents with dark spruce headers and crisp white backgrounds.',
     theme: {
-      presetName: 'Luxury Emerald & Forest',
+      presetName: 'Atlantic Coast (Emerald & Seafoam)',
       accentColor: '#059669',
       accentGlow: '#34d399',
       accentSubtle: '#d1fae5',
@@ -101,12 +94,12 @@ const THEME_PRESETS = [
   },
   {
     id: 'obsidian_gold',
-    name: 'Royal Obsidian & Gold',
-    badge: 'High-End Prestige',
-    previewColors: ['#d97706', '#0d0f12', '#ffffff'],
-    description: 'Warm champagne gold accents against pitch obsidian black tones and warm silk surfaces.',
+    name: 'Royal Boutique (Gold & Charcoal)',
+    badge: 'Luxury Boutique',
+    previewColors: ['#d97706', '#181b20', '#ffffff'],
+    description: 'Warm boutique gold accents against dark charcoal tones.',
     theme: {
-      presetName: 'Royal Obsidian & Gold',
+      presetName: 'Royal Boutique (Gold & Charcoal)',
       accentColor: '#d97706',
       accentGlow: '#fbbf24',
       accentSubtle: '#fef3c7',
@@ -118,110 +111,67 @@ const THEME_PRESETS = [
       surfaceSubtle: '#f6f3ed',
       textColor: '#181b20',
       textMuted: '#6b6a65',
-      borderColor: '#e8e4db'
-    }
-  },
-  {
-    id: 'minimalist',
-    name: 'Monochrome Onyx',
-    badge: 'Pure Black & White',
-    previewColors: ['#18181b', '#09090b', '#ffffff'],
-    description: 'Pure black & titanium gray accents with clean high-contrast crisp white surfaces.',
-    theme: {
-      presetName: 'Monochrome Onyx',
-      accentColor: '#18181b',
-      accentGlow: '#52525b',
-      accentSubtle: '#f4f4f5',
-      darkPrimary: '#09090b',
-      darkNavy: '#18181b',
-      darkNavyLight: '#27272a',
-      pageBg: '#fafafa',
-      surfaceBg: '#ffffff',
-      surfaceSubtle: '#f4f4f5',
-      textColor: '#09090b',
-      textMuted: '#71717a',
-      borderColor: '#e4e4e7'
-    }
-  },
-  {
-    id: 'indigo_violet',
-    name: 'Deep Violet & Indigo',
-    badge: 'Modern Villa',
-    previewColors: ['#6366f1', '#0c0a1f', '#ffffff'],
-    description: 'Vibrant indigo violet accents with deep space dark headers and pearl surfaces.',
-    theme: {
-      presetName: 'Deep Violet & Indigo',
-      accentColor: '#6366f1',
-      accentGlow: '#818cf8',
-      accentSubtle: '#e0e7ff',
-      darkPrimary: '#0c0a1f',
-      darkNavy: '#161335',
-      darkNavyLight: '#231f4e',
-      pageBg: '#f8f8fc',
-      surfaceBg: '#ffffff',
-      surfaceSubtle: '#f1f0fa',
-      textColor: '#161335',
-      textMuted: '#5b577a',
-      borderColor: '#e2e0f0'
-    }
-  },
-  {
-    id: 'ruby',
-    name: 'Crimson Ruby & Midnight',
-    badge: 'Bold & Premium',
-    previewColors: ['#e11d48', '#16080d', '#ffffff'],
-    description: 'Passionate ruby rose accents with espresso midnight dark tones and soft rose surfaces.',
-    theme: {
-      presetName: 'Crimson Ruby & Midnight',
-      accentColor: '#e11d48',
-      accentGlow: '#fb7185',
-      accentSubtle: '#ffe4e6',
-      darkPrimary: '#16080d',
-      darkNavy: '#250e16',
-      darkNavyLight: '#381622',
-      pageBg: '#fcf8f9',
-      surfaceBg: '#ffffff',
-      surfaceSubtle: '#faedf0',
-      textColor: '#250e16',
-      textMuted: '#704f58',
-      borderColor: '#ebd8dc'
+      borderColor: '#e5e2db'
     }
   }
 ];
 
 const AVAILABLE_ICONS = [
-  'Gamepad2', 'Waves', 'Building2', 'ShoppingBag', 'Dumbbell', 'Dices',
-  'Footprints', 'PhoneCall', 'ArrowUpDown', 'Trees', 'ShieldCheck',
-  'Trophy', 'Activity', 'Target', 'PartyPopper', 'CreditCard',
-  'Sparkles', 'Heart', 'Car', 'Coffee', 'Sun'
+  'Wifi', 'Car', 'Plane', 'Clock', 'UtensilsCrossed', 'Flame', 'Sparkles', 'Lock',
+  'Coffee', 'BedDouble', 'Bath', 'ShieldCheck', 'Star', 'MapPin', 'Phone', 'Mail'
 ];
 
 export default function WebsiteCmsView() {
-  const [activeSubTab, setActiveSubTab] = useState('media'); // 'media' | 'theme' | 'brochure' | 'hero' | 'about' | 'clubhouse' | 'amenities' | 'contact'
+  // Tabs: 'hero' | 'stats' | 'about' | 'rooms' | 'inclusions' | 'amenities' | 'location' | 'reviews' | 'contact' | 'theme' | 'media'
+  const [activeSubTab, setActiveSubTab] = useState('hero');
   const [content, setContent] = useState(DEFAULT_CONTENT);
   const [mediaList, setMediaList] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [uploadingKey, setUploadingKey] = useState(null);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
-  const [customColors, setCustomColors] = useState({
-    accent: '#0284c7',
-    dark: '#0b132b',
-    bg: '#f8f9fb'
-  });
-  const [showCustomModal, setShowCustomModal] = useState(false);
-  const [modalThemeName, setModalThemeName] = useState('My Custom Theme');
-  const [modalColors, setModalColors] = useState({
-    accent: '#0284c7',
-    dark: '#0b132b',
-    bg: '#f8f9fb'
+  const [isUploading, setIsUploading] = useState(false);
+
+  // Editing state for rooms
+  const [selectedRoomIndex, setSelectedRoomIndex] = useState(null);
+  const [isAddingRoom, setIsAddingRoom] = useState(false);
+  const [roomFormData, setRoomFormData] = useState({
+    id: '',
+    title: '',
+    badge: '',
+    stats: '',
+    pricePerNight: 850,
+    maxGuests: 2,
+    features: ['Private bathroom', 'Work desk', 'Flat-screen TV'],
+    imageUrl: ''
   });
 
+  // Editing state for amenities
+  const [isAddingAmenity, setIsAddingAmenity] = useState(false);
+  const [selectedAmenityIndex, setSelectedAmenityIndex] = useState(null);
+  const [amenityFormData, setAmenityFormData] = useState({
+    id: '',
+    name: '',
+    category: 'Comfort',
+    desc: '',
+    icon: 'Wifi'
+  });
+
+  // Editing state for reviews
+  const [isAddingReview, setIsAddingReview] = useState(false);
+  const [selectedReviewIndex, setSelectedReviewIndex] = useState(null);
+  const [reviewFormData, setReviewFormData] = useState({
+    id: Date.now(),
+    name: '',
+    location: '',
+    rating: 5.0,
+    initials: '',
+    quote: ''
+  });
+
+  // File upload ref
   const fileInputRef = useRef(null);
-  const brochureFileInputRef = useRef(null);
-  const [pendingUploadTarget, setPendingUploadTarget] = useState(null);
-  const pendingUploadTargetRef = useRef(null);
+  const [uploadTargetField, setUploadTargetField] = useState(null);
 
   useEffect(() => {
     loadCMSData();
@@ -235,2189 +185,1964 @@ export default function WebsiteCmsView() {
         fetchAllMedia()
       ]);
       if (fetchedContent) {
-        const mergedTheme = {
-          ...DEFAULT_CONTENT.theme,
-          ...(fetchedContent.theme || {})
-        };
-        setCustomColors({
-          accent: mergedTheme.accentColor || '#0284c7',
-          dark: mergedTheme.darkPrimary || '#0b132b',
-          bg: mergedTheme.pageBg || '#f8f9fb'
-        });
-        setContent({
-          ...DEFAULT_CONTENT,
-          ...fetchedContent,
-          hero: { ...DEFAULT_CONTENT.hero, ...(fetchedContent.hero || {}) },
-          about: { ...DEFAULT_CONTENT.about, ...(fetchedContent.about || {}) },
-          clubhouse: { ...DEFAULT_CONTENT.clubhouse, ...(fetchedContent.clubhouse || {}) },
-          contact: { ...DEFAULT_CONTENT.contact, ...(fetchedContent.contact || {}) },
-          brochure: { ...DEFAULT_CONTENT.brochure, ...(fetchedContent.brochure || {}) },
-          amenitiesSection: {
-            ...DEFAULT_CONTENT.amenitiesSection,
-            ...(fetchedContent.amenitiesSection || {}),
-            items: (fetchedContent.amenitiesSection?.items && fetchedContent.amenitiesSection.items.length > 0)
-              ? fetchedContent.amenitiesSection.items
-              : DEFAULT_CONTENT.amenitiesSection.items
-          },
-          projectsSection: {
-            ...DEFAULT_CONTENT.projectsSection,
-            ...(fetchedContent.projectsSection || {}),
-            items: (fetchedContent.projectsSection?.items && fetchedContent.projectsSection.items.length > 0)
-              ? fetchedContent.projectsSection.items
-              : DEFAULT_CONTENT.projectsSection.items
-          },
-          customThemes: Array.isArray(fetchedContent.customThemes)
-            ? fetchedContent.customThemes
-            : (DEFAULT_CONTENT.customThemes || []),
-          theme: mergedTheme
-        });
+        setContent(fetchedContent);
       }
-      if (fetchedMedia && fetchedMedia.data) setMediaList(fetchedMedia.data);
+      if (fetchedMedia && fetchedMedia.data) {
+        setMediaList(fetchedMedia.data);
+      }
     } catch (err) {
-      console.warn('Error loading CMS data:', err);
+      console.warn('CMS load error:', err);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleSaveContent = async () => {
+  const handleSave = async (updatedData = content) => {
     setIsSaving(true);
     setErrorMsg('');
-    setSaveSuccess(false);
-
     try {
-      const res = await saveContentToAPI(content);
+      const res = await saveContentToAPI(updatedData);
       if (res && res.success !== false) {
         setSaveSuccess(true);
-        setTimeout(() => setSaveSuccess(false), 4000);
+        setTimeout(() => setSaveSuccess(false), 3000);
       } else {
-        setErrorMsg(res?.message || 'Failed to save website content to database');
+        setErrorMsg(res?.message || 'Failed to save changes to backend API.');
       }
     } catch (err) {
-      setErrorMsg(err.message || 'Error saving content');
+      setErrorMsg(err.message || 'Save error occurred.');
     } finally {
       setIsSaving(false);
     }
   };
 
-const compressImageBeforeUpload = (file, maxWidth = 1920, maxHeight = 1080, quality = 0.85) => {
-  return new Promise((resolve) => {
-    if (!file.type.startsWith('image/') || file.type.includes('svg')) {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = () => resolve(null);
-      reader.readAsDataURL(file);
+  const handleResetToDefaults = async () => {
+    if (!window.confirm('Are you sure you want to reset all website text to factory defaults? Any unsaved edits will be overwritten.')) {
       return;
     }
+    setIsSaving(true);
+    try {
+      await resetContentToDefault();
+      setContent(DEFAULT_CONTENT);
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 3000);
+    } catch (err) {
+      setErrorMsg(err.message || 'Reset failed.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
-    const img = new Image();
-    const objectUrl = URL.createObjectURL(file);
-    img.onload = () => {
-      URL.revokeObjectURL(objectUrl);
-      let { width, height } = img;
-      if (width > maxWidth || height > maxHeight) {
-        if (width / height > maxWidth / maxHeight) {
-          height = Math.round((height * maxWidth) / width);
-          width = maxWidth;
-        } else {
-          width = Math.round((width * maxHeight) / height);
-          height = maxHeight;
-        }
+  // Generic content updater
+  const updateSection = (section, key, value) => {
+    setContent(prev => ({
+      ...prev,
+      [section]: {
+        ...prev[section],
+        [key]: value
       }
-      const canvas = document.createElement('canvas');
-      canvas.width = width;
-      canvas.height = height;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0, width, height);
-      const mime = file.type === 'image/png' && file.size < 600 * 1024 ? 'image/png' : 'image/jpeg';
-      const compressedDataUrl = canvas.toDataURL(mime, quality);
-      resolve(compressedDataUrl);
-    };
-    img.onerror = () => {
-      URL.revokeObjectURL(objectUrl);
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = () => resolve(null);
-      reader.readAsDataURL(file);
-    };
-    img.src = objectUrl;
-  });
-};
+    }));
+  };
 
-  const handleTriggerUpload = (targetKey, category, title, resourceType, extraMeta = null) => {
-    const targetObj = { key: targetKey, category, title, resourceType, extraMeta };
-    pendingUploadTargetRef.current = targetObj;
-    setPendingUploadTarget(targetObj);
+  // Image Upload handler
+  const triggerFileUpload = (targetField) => {
+    setUploadTargetField(targetField);
     if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-      fileInputRef.current.accept = resourceType === 'video' ? 'video/*' : resourceType === 'raw' ? 'application/pdf,*/*' : 'image/*';
       fileInputRef.current.click();
     }
   };
 
-  const handleFileSelected = async (e) => {
+  const handleFileChange = async (e) => {
     const file = e.target.files?.[0];
-    const currentTarget = pendingUploadTargetRef.current || pendingUploadTarget;
-    if (!file || !currentTarget) return;
+    if (!file) return;
 
-    setUploadingKey(currentTarget.key);
-    setErrorMsg('');
-
+    setIsUploading(true);
     try {
-      const base64Data = await compressImageBeforeUpload(file);
-      if (!base64Data) {
-        throw new Error('Could not process selected image');
-      }
+      const formData = new FormData();
+      formData.append('image', file);
 
-      const uploadRes = await uploadMediaToAPI({
-        key: currentTarget.key,
-        file: base64Data,
-        title: currentTarget.title,
-        category: currentTarget.category,
-        resourceType: currentTarget.resourceType || (file.type.startsWith('video') ? 'video' : file.type.includes('pdf') ? 'raw' : 'image')
-      });
-
-      if (uploadRes.success) {
-        const uploadedData = uploadRes.data;
-        const uploadedUrl = uploadedData?.cloudinaryUrl;
-
-        // Immediately update mediaList state so the preview re-renders instantly without being wiped
-        if (uploadedData) {
-          setMediaList((prevList) => {
-            const filtered = prevList.filter((m) => m.key !== uploadedData.key);
-            return [...filtered, uploadedData];
-          });
-        }
-
-        if (currentTarget.key === 'brochurePdf' && uploadedUrl) {
-          setContent((prev) => {
-            const updated = {
-              ...prev,
-              brochure: {
-                ...(prev.brochure || {}),
-                url: uploadedUrl
-              }
-            };
-            saveContentToAPI(updated).catch((err) => console.warn('Auto-save brochure error:', err));
-            return updated;
-          });
-        } else if (currentTarget.extraMeta?.projectIndex !== undefined && uploadedUrl) {
-          const pIdx = currentTarget.extraMeta.projectIndex;
-          setContent((prev) => {
-            const prevProjects = prev.projectsSection?.items || DEFAULT_CONTENT.projectsSection.items;
-            const updated = [...prevProjects];
-            if (updated[pIdx]) {
-              updated[pIdx] = { ...updated[pIdx], image: uploadedUrl };
+      const res = await uploadMediaToAPI(formData);
+      const uploadedUrl = res?.data?.url || res?.url;
+      if (uploadedUrl) {
+        // Apply uploaded URL to target
+        if (uploadTargetField === 'hero.custom') {
+          setContent(prev => ({
+            ...prev,
+            hero: {
+              ...prev.hero,
+              bgImages: { ...prev.hero.bgImages, custom: uploadedUrl }
             }
-            const updatedContent = {
-              ...prev,
-              projectsSection: {
-                ...(prev.projectsSection || {}),
-                items: updated
-              }
-            };
-            saveContentToAPI(updatedContent).catch((err) => console.warn('Auto-save project error:', err));
-            return updatedContent;
-          });
+          }));
+        } else if (uploadTargetField === 'hero.estate') {
+          setContent(prev => ({
+            ...prev,
+            hero: {
+              ...prev.hero,
+              bgImages: { ...prev.hero.bgImages, estate: uploadedUrl }
+            }
+          }));
+        } else if (uploadTargetField === 'hero.surreal') {
+          setContent(prev => ({
+            ...prev,
+            hero: {
+              ...prev.hero,
+              bgImages: { ...prev.hero.bgImages, surreal: uploadedUrl }
+            }
+          }));
+        } else if (uploadTargetField === 'roomForm') {
+          setRoomFormData(prev => ({ ...prev, imageUrl: uploadedUrl }));
         }
-        setSaveSuccess(true);
-        setTimeout(() => setSaveSuccess(false), 3000);
+
+        // Refresh media list
+        const m = await fetchAllMedia();
+        if (m && m.data) setMediaList(m.data);
       } else {
-        setErrorMsg(uploadRes.message || 'Upload failed');
+        alert(res?.message || 'Upload failed or backend did not return URL.');
       }
     } catch (err) {
-      setErrorMsg(err.message || 'File processing error');
+      alert('Upload error: ' + err.message);
     } finally {
-      setUploadingKey(null);
-      pendingUploadTargetRef.current = null;
-      setPendingUploadTarget(null);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
+      setIsUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
 
-  // Projects list manipulators
-  const handleAddProject = () => {
-    const newProject = {
-      id: `proj_${Date.now()}`,
-      title: 'New Luxury Township',
-      tagline: 'Signature Gated Community',
-      location: 'ORR Corridor, Hyderabad',
-      status: 'Upcoming Launch',
-      image: 'https://res.cloudinary.com/s8b4ps7b/image/upload/v1788847939/maytri_ambhuja/gallery/gallery_001.jpg',
-      buttonText: 'For More Info',
-      specs: [
-        { label: 'Project Area', value: '25 Acres' },
-        { label: 'Villas', value: '200 Units' },
-        { label: 'Clubhouse', value: '45,000 Sq.Ft' },
-        { label: 'Starting Price', value: '2.8 Cr*' }
-      ],
-      features: ['Modern Triplex Architecture', 'Landscaped Central Park', '24/7 Gated Security']
+  // Room Management Actions
+  const handleSaveRoom = () => {
+    if (!roomFormData.title) {
+      alert('Room title is required');
+      return;
+    }
+    const currentRooms = [...(content.roomsSection?.items || [])];
+    if (isAddingRoom) {
+      const newRoom = {
+        ...roomFormData,
+        id: roomFormData.id || ('room-' + Date.now())
+      };
+      currentRooms.push(newRoom);
+    } else if (selectedRoomIndex !== null) {
+      currentRooms[selectedRoomIndex] = { ...roomFormData };
+    }
+
+    const updated = {
+      ...content,
+      roomsSection: {
+        ...content.roomsSection,
+        items: currentRooms
+      }
     };
-    setContent(prev => ({
-      ...prev,
-      projectsSection: {
-        ...(prev.projectsSection || {}),
-        items: [...(prev.projectsSection?.items || DEFAULT_CONTENT.projectsSection.items), newProject]
+    setContent(updated);
+    handleSave(updated);
+    setIsAddingRoom(false);
+    setSelectedRoomIndex(null);
+  };
+
+  const handleDeleteRoom = (index) => {
+    if (!window.confirm('Delete this room from website?')) return;
+    const currentRooms = content.roomsSection?.items?.filter((_, i) => i !== index) || [];
+    const updated = {
+      ...content,
+      roomsSection: {
+        ...content.roomsSection,
+        items: currentRooms
       }
-    }));
+    };
+    setContent(updated);
+    handleSave(updated);
   };
 
-  const handleUpdateProject = (index, field, value) => {
-    setContent(prev => {
-      const updated = [...(prev.projectsSection?.items || DEFAULT_CONTENT.projectsSection.items)];
-      updated[index] = { ...updated[index], [field]: value };
-      return {
-        ...prev,
-        projectsSection: {
-          ...(prev.projectsSection || {}),
-          items: updated
-        }
-      };
-    });
-  };
-
-  const handleDeleteProject = (index) => {
-    setContent(prev => {
-      const updated = [...(prev.projectsSection?.items || DEFAULT_CONTENT.projectsSection.items)];
-      updated.splice(index, 1);
-      return {
-        ...prev,
-        projectsSection: {
-          ...(prev.projectsSection || {}),
-          items: updated
-        }
-      };
-    });
-  };
-
-  const handleMoveProject = (index, direction) => {
-    setContent(prev => {
-      const updated = [...(prev.projectsSection?.items || DEFAULT_CONTENT.projectsSection.items)];
-      const targetIndex = index + direction;
-      if (targetIndex < 0 || targetIndex >= updated.length) return prev;
-      const temp = updated[index];
-      updated[index] = updated[targetIndex];
-      updated[targetIndex] = temp;
-      return {
-        ...prev,
-        projectsSection: {
-          ...(prev.projectsSection || {}),
-          items: updated
-        }
-      };
-    });
-  };
-
-  const handleAddSpec = (projectIndex) => {
-    setContent(prev => {
-      const updatedProjects = [...(prev.projectsSection?.items || DEFAULT_CONTENT.projectsSection.items)];
-      const project = { ...updatedProjects[projectIndex] };
-      const currentSpecs = Array.isArray(project.specs) ? [...project.specs] : [];
-      currentSpecs.push({ label: '', value: '' });
-      project.specs = currentSpecs;
-      updatedProjects[projectIndex] = project;
-      return {
-        ...prev,
-        projectsSection: {
-          ...(prev.projectsSection || {}),
-          items: updatedProjects
-        }
-      };
-    });
-  };
-
-  const handleUpdateSpec = (projectIndex, specIndex, field, value) => {
-    setContent(prev => {
-      const updatedProjects = [...(prev.projectsSection?.items || DEFAULT_CONTENT.projectsSection.items)];
-      const project = { ...updatedProjects[projectIndex] };
-      const currentSpecs = Array.isArray(project.specs) ? [...project.specs] : [];
-      currentSpecs[specIndex] = { ...currentSpecs[specIndex], [field]: value };
-      project.specs = currentSpecs;
-      updatedProjects[projectIndex] = project;
-      return {
-        ...prev,
-        projectsSection: {
-          ...(prev.projectsSection || {}),
-          items: updatedProjects
-        }
-      };
-    });
-  };
-
-  const handleDeleteSpec = (projectIndex, specIndex) => {
-    setContent(prev => {
-      const updatedProjects = [...(prev.projectsSection?.items || DEFAULT_CONTENT.projectsSection.items)];
-      const project = { ...updatedProjects[projectIndex] };
-      const currentSpecs = Array.isArray(project.specs) ? [...project.specs] : [];
-      currentSpecs.splice(specIndex, 1);
-      project.specs = currentSpecs;
-      updatedProjects[projectIndex] = project;
-      return {
-        ...prev,
-        projectsSection: {
-          ...(prev.projectsSection || {}),
-          items: updatedProjects
-        }
-      };
-    });
-  };
-
-  const handleAddFeature = (projectIndex) => {
-    setContent(prev => {
-      const updatedProjects = [...(prev.projectsSection?.items || DEFAULT_CONTENT.projectsSection.items)];
-      const project = { ...updatedProjects[projectIndex] };
-      const currentFeatures = Array.isArray(project.features) ? [...project.features] : [];
-      currentFeatures.push('');
-      project.features = currentFeatures;
-      updatedProjects[projectIndex] = project;
-      return {
-        ...prev,
-        projectsSection: {
-          ...(prev.projectsSection || {}),
-          items: updatedProjects
-        }
-      };
-    });
-  };
-
-  const handleUpdateFeature = (projectIndex, featureIndex, value) => {
-    setContent(prev => {
-      const updatedProjects = [...(prev.projectsSection?.items || DEFAULT_CONTENT.projectsSection.items)];
-      const project = { ...updatedProjects[projectIndex] };
-      const currentFeatures = Array.isArray(project.features) ? [...project.features] : [];
-      currentFeatures[featureIndex] = value;
-      project.features = currentFeatures;
-      updatedProjects[projectIndex] = project;
-      return {
-        ...prev,
-        projectsSection: {
-          ...(prev.projectsSection || {}),
-          items: updatedProjects
-        }
-      };
-    });
-  };
-
-  const handleDeleteFeature = (projectIndex, featureIndex) => {
-    setContent(prev => {
-      const updatedProjects = [...(prev.projectsSection?.items || DEFAULT_CONTENT.projectsSection.items)];
-      const project = { ...updatedProjects[projectIndex] };
-      const currentFeatures = Array.isArray(project.features) ? [...project.features] : [];
-      currentFeatures.splice(featureIndex, 1);
-      project.features = currentFeatures;
-      updatedProjects[projectIndex] = project;
-      return {
-        ...prev,
-        projectsSection: {
-          ...(prev.projectsSection || {}),
-          items: updatedProjects
-        }
-      };
-    });
-  };
-
-  // Amenities list manipulators
-  const handleAddAmenity = () => {
-    const newItems = [
-      ...(content.amenitiesSection?.items || []),
-      {
-        name: 'New Custom Amenity',
-        category: 'Leisure',
-        img: '',
-        iconName: 'Sparkles'
-      }
-    ];
-    setContent({
+  // Amenity Management Actions
+  const handleSaveAmenity = () => {
+    if (!amenityFormData.name) {
+      alert('Amenity name is required');
+      return;
+    }
+    const current = [...(content.amenitiesSection?.items || [])];
+    if (isAddingAmenity) {
+      current.push({ ...amenityFormData, id: 'amenity-' + Date.now() });
+    } else if (selectedAmenityIndex !== null) {
+      current[selectedAmenityIndex] = { ...amenityFormData };
+    }
+    const updated = {
       ...content,
       amenitiesSection: {
-        ...(content.amenitiesSection || {}),
-        items: newItems
+        ...content.amenitiesSection,
+        items: current
       }
-    });
-  };
-
-  const handleUpdateAmenity = (index, field, value) => {
-    const updated = [...(content.amenitiesSection?.items || [])];
-    updated[index] = { ...updated[index], [field]: value };
-    setContent({
-      ...content,
-      amenitiesSection: {
-        ...(content.amenitiesSection || {}),
-        items: updated
-      }
-    });
+    };
+    setContent(updated);
+    handleSave(updated);
+    setIsAddingAmenity(false);
+    setSelectedAmenityIndex(null);
   };
 
   const handleDeleteAmenity = (index) => {
-    const updated = [...(content.amenitiesSection?.items || [])];
-    updated.splice(index, 1);
-    setContent({
+    if (!window.confirm('Delete this amenity?')) return;
+    const current = content.amenitiesSection?.items?.filter((_, i) => i !== index) || [];
+    const updated = {
       ...content,
       amenitiesSection: {
-        ...(content.amenitiesSection || {}),
-        items: updated
+        ...content.amenitiesSection,
+        items: current
       }
-    });
+    };
+    setContent(updated);
+    handleSave(updated);
   };
 
-  const handleMoveAmenity = (index, direction) => {
-    const updated = [...(content.amenitiesSection?.items || [])];
-    const targetIndex = index + direction;
-    if (targetIndex < 0 || targetIndex >= updated.length) return;
-    const temp = updated[index];
-    updated[index] = updated[targetIndex];
-    updated[targetIndex] = temp;
-    setContent({
+  // Review Management Actions
+  const handleSaveReview = () => {
+    if (!reviewFormData.name || !reviewFormData.quote) {
+      alert('Guest name and review quote are required');
+      return;
+    }
+    const initials = reviewFormData.initials || 
+      reviewFormData.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+
+    const current = [...(content.reviewsSection?.items || [])];
+    if (isAddingReview) {
+      current.push({ ...reviewFormData, initials, id: Date.now() });
+    } else if (selectedReviewIndex !== null) {
+      current[selectedReviewIndex] = { ...reviewFormData, initials };
+    }
+    const updated = {
       ...content,
-      amenitiesSection: {
-        ...(content.amenitiesSection || {}),
-        items: updated
-      }
-    });
-  };
-
-  const autoSaveTimerRef = useRef(null);
-
-  const saveThemeDirectly = async (updatedTheme) => {
-    setIsSaving(true);
-    setErrorMsg('');
-    try {
-      const payload = {
-        ...content,
-        theme: updatedTheme
-      };
-      await saveContentToAPI(payload);
-      setSaveSuccess(true);
-      setTimeout(() => setSaveSuccess(false), 3000);
-    } catch (err) {
-      setErrorMsg('Failed to apply theme to live site: ' + err.message);
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const handleApplyThemePreset = (preset) => {
-    const updatedTheme = {
-      ...DEFAULT_CONTENT.theme,
-      ...(content.theme || {}),
-      ...preset.theme
-    };
-    setContent(prev => ({
-      ...prev,
-      theme: updatedTheme
-    }));
-    setCustomColors({
-      accent: preset.theme.accentColor || '#0284c7',
-      dark: preset.theme.darkPrimary || '#0b132b',
-      bg: preset.theme.pageBg || '#f8f9fb'
-    });
-    // Instantly save to MongoDB and broadcast to live website
-    saveThemeDirectly(updatedTheme);
-  };
-
-  const handleOpenCustomModal = () => {
-    const existingCount = (content.customThemes || []).length;
-    setModalThemeName(`Custom Theme ${existingCount + 1}`);
-    setModalColors({
-      accent: content.theme?.accentColor || '#0284c7',
-      dark: content.theme?.darkPrimary || '#0b132b',
-      bg: content.theme?.pageBg || '#f8f9fb'
-    });
-    setShowCustomModal(true);
-  };
-
-  const handleCreateCustomTheme = async () => {
-    const name = modalThemeName.trim() || `Custom Theme ${(content.customThemes || []).length + 1}`;
-    const newCustomPreset = {
-      id: 'custom_' + Date.now(),
-      name: name,
-      badge: 'Custom',
-      isCustom: true,
-      previewColors: [modalColors.accent, modalColors.dark, modalColors.bg],
-      description: `Custom 3-color palette created by admin.`,
-      theme: {
-        presetName: name,
-        accentColor: modalColors.accent,
-        accentGlow: modalColors.accent,
-        accentSubtle: `${modalColors.accent}25`,
-        darkPrimary: modalColors.dark,
-        darkNavy: modalColors.dark,
-        darkNavyLight: modalColors.dark,
-        pageBg: modalColors.bg,
-        surfaceBg: '#ffffff',
-        surfaceSubtle: modalColors.bg,
-        textColor: modalColors.dark,
-        textMuted: '#52637f',
-        borderColor: '#e2e6ed'
+      reviewsSection: {
+        ...content.reviewsSection,
+        items: current
       }
     };
-
-    const updatedCustomThemes = [...(content.customThemes || []), newCustomPreset];
-
-    setContent(prev => ({
-      ...prev,
-      customThemes: updatedCustomThemes,
-      theme: newCustomPreset.theme
-    }));
-    setCustomColors({
-      accent: modalColors.accent,
-      dark: modalColors.dark,
-      bg: modalColors.bg
-    });
-    setShowCustomModal(false);
-
-    setIsSaving(true);
-    try {
-      const payload = {
-        ...content,
-        customThemes: updatedCustomThemes,
-        theme: newCustomPreset.theme
-      };
-      await saveContentToAPI(payload);
-      setSaveSuccess(true);
-      setTimeout(() => setSaveSuccess(false), 3000);
-    } catch (err) {
-      setErrorMsg('Failed to create custom theme: ' + err.message);
-    } finally {
-      setIsSaving(false);
-    }
+    setContent(updated);
+    handleSave(updated);
+    setIsAddingReview(false);
+    setSelectedReviewIndex(null);
   };
 
-  const handleDeleteCustomTheme = async (themeId, e) => {
-    if (e) e.stopPropagation();
-    const currentCustoms = content.customThemes || [];
-    const targetItem = currentCustoms.find(t => t.id === themeId);
-    const updatedCustomThemes = currentCustoms.filter(t => t.id !== themeId);
-    
-    // If currently active theme is this deleted one, fall back to Default Preset
-    let updatedTheme = content.theme;
-    if (targetItem && content.theme?.presetName === targetItem.name) {
-      updatedTheme = THEME_PRESETS[0].theme;
-    }
-
-    setContent(prev => ({
-      ...prev,
-      customThemes: updatedCustomThemes,
-      theme: updatedTheme
-    }));
-
-    setIsSaving(true);
-    try {
-      const payload = {
-        ...content,
-        customThemes: updatedCustomThemes,
-        theme: updatedTheme
-      };
-      await saveContentToAPI(payload);
-      setSaveSuccess(true);
-      setTimeout(() => setSaveSuccess(false), 3000);
-    } catch (err) {
-      setErrorMsg('Failed to delete custom theme: ' + err.message);
-    } finally {
-      setIsSaving(false);
-    }
+  const handleDeleteReview = (index) => {
+    if (!window.confirm('Delete this review?')) return;
+    const current = content.reviewsSection?.items?.filter((_, i) => i !== index) || [];
+    const updated = {
+      ...content,
+      reviewsSection: {
+        ...content.reviewsSection,
+        items: current
+      }
+    };
+    setContent(updated);
+    handleSave(updated);
   };
 
-  const handleResetThemeToDefault = () => {
-    const defaultTheme = { ...DEFAULT_CONTENT.theme };
-    setContent(prev => ({
-      ...prev,
-      theme: defaultTheme
-    }));
-    setCustomColors({
-      accent: defaultTheme.accentColor,
-      dark: defaultTheme.darkPrimary,
-      bg: defaultTheme.pageBg
-    });
-    saveThemeDirectly(defaultTheme);
-  };
-
-  const getMediaUrl = (key, fallback = '') => {
-    const item = mediaList.find((m) => m.key === key);
-    return item?.cloudinaryUrl || fallback;
-  };
+  const liveWebsiteUrl = getWebsiteUrl();
 
   if (isLoading) {
     return (
-      <div className="empty-state" style={{ minHeight: '400px' }}>
-        <Loader2 size={36} className="animate-spin text-teal-600" />
-        <div style={{ fontWeight: 700, marginTop: '1rem' }}>Loading Website CMS &amp; Cloud Assets...</div>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '400px', flexDirection: 'column', gap: '12px' }}>
+        <Loader2 size={36} className="animate-spin text-blue-600" />
+        <span style={{ fontSize: '15px', color: '#64748b', fontWeight: 600 }}>Loading Edion Royal Website Content...</span>
       </div>
     );
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-      {/* Hidden File Input for Cloudinary Uploads */}
+    <div className="cms-container" style={{ padding: '1.5rem', maxWidth: '1440px', margin: '0 auto' }}>
+      {/* Hidden File Input for Cloudinary / Backend Upload */}
       <input 
         type="file" 
         ref={fileInputRef} 
         style={{ display: 'none' }} 
-        onChange={handleFileSelected} 
+        accept="image/*" 
+        onChange={handleFileChange} 
       />
 
-      {/* Top CMS Header */}
-      <div className="table-card" style={{ padding: '1.25rem 1.5rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
+      {/* Top Action Header */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        flexWrap: 'wrap',
+        gap: '1rem',
+        background: '#ffffff',
+        padding: '1.25rem 1.5rem',
+        borderRadius: '16px',
+        border: '1px solid #e2e8f0',
+        boxShadow: '0 4px 16px rgba(15, 23, 42, 0.04)',
+        marginBottom: '1.5rem'
+      }}>
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <span style={{
+              background: '#eff6ff',
+              color: '#2563eb',
+              padding: '4px 10px',
+              borderRadius: '20px',
+              fontSize: '12px',
+              fontWeight: 800,
+              letterSpacing: '0.05em'
+            }}>
+              LIVE CMS &amp; TEXT CONTROL
+            </span>
+            <span style={{ fontSize: '13px', color: '#10b981', display: 'flex', alignItems: 'center', gap: '4px', fontWeight: 600 }}>
+              <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10b981', display: 'inline-block' }}></span>
+              Connected to MongoDB
+            </span>
+          </div>
+          <h1 style={{ fontSize: '24px', fontWeight: 800, color: '#0f172a', margin: '6px 0 2px' }}>
+            Edion Royal Website Content Manager
+          </h1>
+          <p style={{ fontSize: '14px', color: '#64748b', margin: 0 }}>
+            Modify any text, headline, rooms, amenities, contact numbers, or photos. Every change syncs in real-time to the live website.
+          </p>
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+          <button 
+            type="button" 
+            onClick={() => handleSave()}
+            disabled={isSaving || isUploading}
+            className="btn btn-primary"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '9px 20px',
+              borderRadius: '10px',
+              fontWeight: 800,
+              fontSize: '14px',
+              background: '#2563eb',
+              color: '#ffffff',
+              border: 'none',
+              cursor: 'pointer',
+              boxShadow: '0 4px 14px rgba(37, 99, 235, 0.35)'
+            }}
+          >
+            {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+            <span>{isSaving ? 'Saving Changes...' : 'Save All Changes'}</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Notifications Banner */}
+      {saveSuccess && (
+        <div style={{
+          background: '#ecfdf5',
+          border: '1.5px solid #a7f3d0',
+          color: '#065f46',
+          padding: '12px 18px',
+          borderRadius: '12px',
+          fontSize: '14px',
+          fontWeight: 700,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px',
+          marginBottom: '1.5rem'
+        }}>
+          <CheckCircle size={20} color="#10b981" />
+          <span>Website content updated successfully! The live website and local cache are synchronized.</span>
+        </div>
+      )}
+
+      {errorMsg && (
+        <div style={{
+          background: '#fef2f2',
+          border: '1.5px solid #fecaca',
+          color: '#991b1b',
+          padding: '12px 18px',
+          borderRadius: '12px',
+          fontSize: '14px',
+          fontWeight: 700,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '10px',
+          marginBottom: '1.5rem'
+        }}>
+          <AlertCircle size={20} color="#ef4444" />
+          <span>{errorMsg}</span>
+        </div>
+      )}
+
+      {/* Sub-Navigation Tabs */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '6px',
+        overflowX: 'auto',
+        background: '#ffffff',
+        padding: '8px',
+        borderRadius: '14px',
+        border: '1px solid #e2e8f0',
+        marginBottom: '1.5rem'
+      }}>
+        {[
+          { id: 'hero', label: '1. Hero & Banner', icon: Building2 },
+          { id: 'stats', label: '2. Ratings & Stats', icon: Star },
+          { id: 'about', label: '3. About & Welcome', icon: Sparkles },
+          { id: 'rooms', label: '4. Rooms Manager', icon: BedDouble },
+          { id: 'inclusions', label: '5. Inclusions', icon: Bath },
+          { id: 'amenities', label: '6. Amenities Directory', icon: Coffee },
+          { id: 'location', label: '7. Location & Distances', icon: MapPin },
+          { id: 'reviews', label: '8. Guest Reviews', icon: Star },
+          { id: 'contact', label: '9. Contact & Times', icon: Phone },
+          { id: 'theme', label: '10. Theme & Colors', icon: Palette },
+          { id: 'media', label: '11. Media Gallery', icon: ImageIcon }
+        ].map(tab => {
+          const Icon = tab.icon;
+          const isActive = activeSubTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setActiveSubTab(tab.id)}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '7px',
+                padding: '10px 16px',
+                borderRadius: '10px',
+                fontSize: '13.5px',
+                fontWeight: isActive ? 800 : 600,
+                color: isActive ? '#2563eb' : '#475569',
+                background: isActive ? '#eff6ff' : 'transparent',
+                border: isActive ? '1px solid #bfdbfe' : '1px solid transparent',
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              <Icon size={15} color={isActive ? '#2563eb' : '#64748b'} />
+              <span>{tab.label}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* ========================================================= */}
+      {/* TAB 1: HERO & TOP BANNER                                  */}
+      {/* ========================================================= */}
+      {activeSubTab === 'hero' && (
+        <div style={{ background: '#ffffff', padding: '2rem', borderRadius: '16px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
           <div>
-            <h2 className="table-title" style={{ fontSize: '1.25rem' }}>
-              <Globe size={20} className="text-cyan-500" />
-              <span>Live Website CMS &amp; Media Studio</span>
-              <span className="live-indicator" style={{ marginLeft: '0.5rem' }}>
-                <span className="live-dot" />
-                <span>Sync Active</span>
-              </span>
+            <h2 style={{ fontSize: '18px', fontWeight: 800, color: '#0f172a', margin: '0 0 4px' }}>
+              Hero Section &amp; Background Views
             </h2>
-            <p style={{ fontSize: '0.82rem', color: '#475569', marginTop: '4px' }}>
-              Manage website brochure PDF, Resort-Style Conveniences, slogans, pricing, and 4K media in real time.
+            <p style={{ fontSize: '13.5px', color: '#64748b', margin: 0 }}>
+              Control the top hero screen of Edion Royal Guesthouse: main headline, subtitle, direct contact numbers, and 3 swappable background views.
             </p>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <button 
-              className="btn btn-secondary btn-sm"
-              onClick={loadCMSData}
-              title="Refresh from MongoDB"
-            >
-              <RefreshCw size={14} />
-              <span>Refresh</span>
-            </button>
-
-            <a
-              href="https://www.maytriambhuja.in/"
-              target="_blank"
-              rel="noreferrer"
-              className="btn btn-secondary btn-sm"
-              title="Preview Website in new tab"
-            >
-              <span>Preview Site</span>
-              <ExternalLink size={13} />
-            </a>
-
-            <button
-              className="btn btn-primary"
-              onClick={handleSaveContent}
-              disabled={isSaving}
-            >
-              {isSaving ? (
-                <>
-                  <Loader2 size={16} className="animate-spin" />
-                  <span>Saving to Cloud...</span>
-                </>
-              ) : (
-                <>
-                  <Save size={16} />
-                  <span>Save &amp; Publish Website</span>
-                </>
-              )}
-            </button>
-          </div>
-        </div>
-
-        {/* Notifications */}
-        {saveSuccess && (
-          <div style={{ marginTop: '1rem', padding: '0.75rem 1rem', background: '#dcfce7', border: '1.5px solid #86efac', borderRadius: '8px', color: '#166534', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', fontWeight: 700 }}>
-            <CheckCircle size={16} />
-            <span>Success! Website content, brochure link &amp; amenities published live to database!</span>
-          </div>
-        )}
-
-        {errorMsg && (
-          <div style={{ marginTop: '1rem', padding: '0.75rem 1rem', background: '#fee2e2', border: '1.5px solid #fca5a5', borderRadius: '8px', color: '#991b1b', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', fontWeight: 700 }}>
-            <AlertCircle size={16} />
-            <span>{errorMsg}</span>
-          </div>
-        )}
-      </div>
-
-      {/* Sub Tabs Navigation */}
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%', margin: '0 auto' }}>
-        <div 
-          className="nav-tabs" 
-          style={{ 
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            flexWrap: 'wrap',
-            overflow: 'visible',
-            overflowX: 'visible',
-            maxWidth: '100%',
-            gap: '0.35rem',
-            padding: '0.35rem 0.6rem'
-          }}
-        >
-        <button
-          className={`nav-tab-btn ${activeSubTab === 'media' ? 'active' : ''}`}
-          onClick={() => setActiveSubTab('media')}
-        >
-          <ImageIcon size={15} />
-          <span>Media &amp; Cloud Assets</span>
-        </button>
-
-        <button
-          className={`nav-tab-btn ${activeSubTab === 'theme' ? 'active' : ''}`}
-          onClick={() => setActiveSubTab('theme')}
-        >
-          <Palette size={15} />
-          <span>Theme &amp; Colors</span>
-        </button>
-
-        <button
-          className={`nav-tab-btn ${activeSubTab === 'brochure' ? 'active' : ''}`}
-          onClick={() => setActiveSubTab('brochure')}
-        >
-          <FileText size={15} />
-          <span>Brochure PDF Kit</span>
-        </button>
-
-        <button
-          className={`nav-tab-btn ${activeSubTab === 'projects' ? 'active' : ''}`}
-          onClick={() => setActiveSubTab('projects')}
-        >
-          <Building2 size={15} />
-          <span>Our Projects</span>
-        </button>
-
-        <button
-          className={`nav-tab-btn ${activeSubTab === 'amenities' ? 'active' : ''}`}
-          onClick={() => setActiveSubTab('amenities')}
-        >
-          <Sparkles size={15} />
-          <span>Resort Amenities</span>
-        </button>
-
-        <button
-          className={`nav-tab-btn ${activeSubTab === 'hero' ? 'active' : ''}`}
-          onClick={() => setActiveSubTab('hero')}
-        >
-          <Sparkles size={15} />
-          <span>Hero &amp; Headline Copy</span>
-        </button>
-
-        <button
-          className={`nav-tab-btn ${activeSubTab === 'about' ? 'active' : ''}`}
-          onClick={() => setActiveSubTab('about')}
-        >
-          <Building size={15} />
-          <span>About &amp; Township Stats</span>
-        </button>
-
-        <button
-          className={`nav-tab-btn ${activeSubTab === 'clubhouse' ? 'active' : ''}`}
-          onClick={() => setActiveSubTab('clubhouse')}
-        >
-          <Layers size={15} />
-          <span>Clubhouse Copy</span>
-        </button>
-
-        <button
-          className={`nav-tab-btn ${activeSubTab === 'contact' ? 'active' : ''}`}
-          onClick={() => setActiveSubTab('contact')}
-        >
-          <Phone size={15} />
-          <span>Contact &amp; Sales Desk</span>
-        </button>
-      </div>
-    </div>
-
-      {/* TAB 1: MEDIA ASSETS STUDIO */}
-      {activeSubTab === 'media' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          {/* Brand & Hero Media Grid */}
-          <div className="table-card" style={{ padding: '1.5rem' }}>
-            <h3 style={{ fontSize: '1.05rem', fontWeight: 800, marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <ImageIcon size={18} className="text-cyan-600" />
-              <span>Core Brand &amp; Hero Background Media</span>
-            </h3>
-
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.25rem' }}>
-              {/* Brand Logo */}
-              <div className="stat-card" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '0.75rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
-                  <span className="stat-label">Main Brand Logo</span>
-                  <span className="brand-badge admin-badge">Logo</span>
-                </div>
-                <div style={{ width: '100%', height: '80px', background: '#0b132b', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '8px' }}>
-                  <img src={getMediaUrl('logo', '/ambhuja-logo.png')} alt="Logo" style={{ maxHeight: '60px', maxWidth: '100%', objectFit: 'contain' }} />
-                </div>
-                <button
-                  className="btn btn-secondary btn-sm"
-                  style={{ width: '100%' }}
-                  onClick={() => handleTriggerUpload('logo', 'logo', 'Maytri Ambhuja Brand Logo', 'image')}
-                  disabled={uploadingKey === 'logo'}
-                >
-                  {uploadingKey === 'logo' ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
-                  <span>{uploadingKey === 'logo' ? 'Uploading...' : 'Replace Main Brand Logo'}</span>
-                </button>
-              </div>
-
-              {/* Sanghi City Logo */}
-              <div className="stat-card" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '0.75rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
-                  <span className="stat-label">Sanghi City Navbar Logo</span>
-                  <span className="brand-badge emp-badge">Navbar Brand</span>
-                </div>
-                <div style={{ width: '100%', height: '80px', background: '#0b132b', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '8px' }}>
-                  <img src={getMediaUrl('sanghiLogo', '/sanghicity-logo.png')} alt="Sanghi Logo" style={{ maxHeight: '55px', maxWidth: '100%', objectFit: 'contain' }} />
-                </div>
-                <button
-                  className="btn btn-secondary btn-sm"
-                  style={{ width: '100%' }}
-                  onClick={() => handleTriggerUpload('sanghiLogo', 'logo', 'Sanghi City Logo', 'image')}
-                  disabled={uploadingKey === 'sanghiLogo'}
-                >
-                  {uploadingKey === 'sanghiLogo' ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
-                  <span>{uploadingKey === 'sanghiLogo' ? 'Uploading...' : 'Replace Sanghi City Logo'}</span>
-                </button>
-              </div>
-
-              {/* Hero Background Poster */}
-              <div className="stat-card" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '0.75rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
-                  <span className="stat-label">Hero Poster / Cover</span>
-                  <span className="brand-badge admin-badge">Image</span>
-                </div>
-                <div style={{ width: '100%', height: '80px', background: '#0b132b', borderRadius: '8px', overflow: 'hidden' }}>
-                  <img src={getMediaUrl('heroPoster', '/hero-bg.png')} alt="Hero Poster" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                </div>
-                <button
-                  className="btn btn-secondary btn-sm"
-                  style={{ width: '100%' }}
-                  onClick={() => handleTriggerUpload('heroPoster', 'image', 'Hero Background Poster', 'image')}
-                  disabled={uploadingKey === 'heroPoster'}
-                >
-                  {uploadingKey === 'heroPoster' ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
-                  <span>{uploadingKey === 'heroPoster' ? 'Uploading...' : 'Upload Hero Poster'}</span>
-                </button>
-              </div>
-
-              {/* Hero Video Background */}
-              <div className="stat-card" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: '0.75rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
-                  <span className="stat-label">Hero 4K Streaming Video</span>
-                  <span className="brand-badge emp-badge">Video (MP4)</span>
-                </div>
-                <div style={{ width: '100%', height: '80px', background: '#000', borderRadius: '8px', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <Film size={28} className="text-teal-400" />
-                </div>
-                <button
-                  className="btn btn-secondary btn-sm"
-                  style={{ width: '100%' }}
-                  onClick={() => handleTriggerUpload('heroVideo', 'video', 'Hero Background Video', 'video')}
-                  disabled={uploadingKey === 'heroVideo'}
-                >
-                  {uploadingKey === 'heroVideo' ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
-                  <span>{uploadingKey === 'heroVideo' ? 'Uploading Video...' : 'Upload Video to Cloud'}</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* TAB 2: BROCHURE PDF KIT MANAGER */}
-      {activeSubTab === 'brochure' && (
-        <div className="table-card" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-          <h3 style={{ fontSize: '1.05rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <FileText size={18} className="text-cyan-600" />
-            <span>Project Digital Brochure &amp; PDF Kit Configuration</span>
-          </h3>
-
-          <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
-              <div>
-                <span style={{ fontSize: '0.9rem', fontWeight: 800, color: '#0f172a' }}>Brochure PDF Download Source</span>
-                <p style={{ fontSize: '0.8rem', color: '#64748b', margin: 0 }}>Direct URL link or uploaded PDF file downloaded by website prospects.</p>
-              </div>
-              
-              <button
-                className="btn btn-secondary btn-sm"
-                onClick={() => handleTriggerUpload('brochurePdf', 'brochure', 'Township Digital Brochure PDF', 'raw')}
-                disabled={uploadingKey === 'brochurePdf'}
-              >
-                {uploadingKey === 'brochurePdf' ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
-                <span>{uploadingKey === 'brochurePdf' ? 'Uploading PDF...' : 'Upload PDF File to Cloudinary'}</span>
-              </button>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.25rem' }}>
+            <div className="form-group">
+              <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
+                Location / Eyebrow Badge
+              </label>
+              <input 
+                type="text" 
+                className="form-input" 
+                value={content.hero?.eyebrowBadge || ''} 
+                onChange={(e) => updateSection('hero', 'eyebrowBadge', e.target.value)}
+                placeholder="Milnerton · Cape Town"
+              />
             </div>
 
             <div className="form-group">
-              <label className="form-label">Brochure PDF File Link / URL</label>
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
-                <input
-                  type="text"
-                  className="form-input"
-                  value={content.brochure?.url || ''}
-                  onChange={(e) => setContent({ ...content, brochure: { ...(content.brochure || {}), url: e.target.value } })}
-                  placeholder="/assets/maytri-ambhuja-brochure.pdf or https://res.cloudinary.com/..."
-                />
-                {content.brochure?.url && (
-                  <a
-                    href={content.brochure.url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="btn btn-secondary"
-                    style={{ whiteSpace: 'nowrap' }}
-                  >
-                    <Download size={14} />
-                    <span>Test Link</span>
-                  </a>
-                )}
-              </div>
+              <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
+                Direct Reservations Phone
+              </label>
+              <input 
+                type="text" 
+                className="form-input" 
+                value={content.hero?.phone || ''} 
+                onChange={(e) => updateSection('hero', 'phone', e.target.value)}
+                placeholder="078 972 4254"
+              />
             </div>
-          </div>
 
-          <div className="form-group">
-            <label className="form-label">Brochure Download Modal Heading</label>
-            <input
-              type="text"
-              className="form-input"
-              value={content.brochure?.modalTitle || ''}
-              onChange={(e) => setContent({ ...content, brochure: { ...(content.brochure || {}), modalTitle: e.target.value } })}
-              placeholder="Download Maytri Ambhuja Brochure"
-            />
-          </div>
+            <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+              <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
+                Main Headline (Hero Title)
+              </label>
+              <input 
+                type="text" 
+                className="form-input" 
+                value={content.hero?.title || ''} 
+                onChange={(e) => updateSection('hero', 'title', e.target.value)}
+                placeholder="A warm, quiet stay minutes from the sea"
+              />
+            </div>
 
-          <div className="form-group">
-            <label className="form-label">Brochure Modal Description</label>
-            <textarea
-              className="form-textarea"
-              rows={3}
-              value={content.brochure?.modalDesc || ''}
-              onChange={(e) => setContent({ ...content, brochure: { ...(content.brochure || {}), modalDesc: e.target.value } })}
-              placeholder="Receive the official villa township brochure featuring master plan details..."
-            />
-          </div>
-        </div>
-      )}
-
-      {/* TAB: OUR PROJECTS CMS MANAGER */}
-      {activeSubTab === 'projects' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-          {/* Section Header Controls */}
-          <div className="table-card" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-            <h3 style={{ fontSize: '1.05rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <Building2 size={18} className="text-cyan-600" />
-              <span>Our Projects Section Header Settings</span>
-            </h3>
-
-            <div className="form-grid-2">
-              <div className="form-group">
-                <label className="form-label">Section Eyebrow Badge</label>
-                <input
-                  type="text"
-                  className="form-input"
-                  value={content.projectsSection?.eyebrowTag || ''}
-                  onChange={(e) => setContent({ ...content, projectsSection: { ...(content.projectsSection || {}), eyebrowTag: e.target.value } })}
-                  placeholder="LANDMARK DEVELOPMENTS"
-                />
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">Section Main Title</label>
-                <input
-                  type="text"
-                  className="form-input"
-                  value={content.projectsSection?.title || ''}
-                  onChange={(e) => setContent({ ...content, projectsSection: { ...(content.projectsSection || {}), title: e.target.value } })}
-                  placeholder="Our Projects"
-                />
-              </div>
+            <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+              <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
+                Hero Subheading / Tagline
+              </label>
+              <textarea 
+                rows={3}
+                className="form-input" 
+                value={content.hero?.subheading || ''} 
+                onChange={(e) => updateSection('hero', 'subheading', e.target.value)}
+                placeholder="Comfortable, secure accommodation in Milnerton. Private rooms, Wi-Fi and everything you need for a relaxed stay."
+              />
             </div>
 
             <div className="form-group">
-              <label className="form-label">Section Subtitle</label>
-              <textarea
-                className="form-textarea"
-                rows={2}
-                value={content.projectsSection?.subtitle || ''}
-                onChange={(e) => setContent({ ...content, projectsSection: { ...(content.projectsSection || {}), subtitle: e.target.value } })}
-                placeholder="Explore premier master-planned townships and signature villa communities developed with unmatched luxury, architectural brilliance, and strategic connectivity."
+              <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
+                Primary CTA Button Label
+              </label>
+              <input 
+                type="text" 
+                className="form-input" 
+                value={content.hero?.ctaPrimary || ''} 
+                onChange={(e) => updateSection('hero', 'ctaPrimary', e.target.value)}
+                placeholder="Check availability"
+              />
+            </div>
+
+            <div className="form-group">
+              <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
+                Secondary CTA Button Label
+              </label>
+              <input 
+                type="text" 
+                className="form-input" 
+                value={content.hero?.ctaSecondary || ''} 
+                onChange={(e) => updateSection('hero', 'ctaSecondary', e.target.value)}
+                placeholder="View our rooms"
+              />
+            </div>
+
+            <div className="form-group">
+              <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
+                Hero Corner Address Title
+              </label>
+              <input 
+                type="text" 
+                className="form-input" 
+                value={content.hero?.addressTitle || ''} 
+                onChange={(e) => updateSection('hero', 'addressTitle', e.target.value)}
+                placeholder="7 Arum Street"
+              />
+            </div>
+
+            <div className="form-group">
+              <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
+                Hero Corner Address Subtitle
+              </label>
+              <input 
+                type="text" 
+                className="form-input" 
+                value={content.hero?.addressSubtitle || ''} 
+                onChange={(e) => updateSection('hero', 'addressSubtitle', e.target.value)}
+                placeholder="Milnerton, Cape Town"
               />
             </div>
           </div>
 
-          {/* Dynamic Projects List Editor */}
-          <div className="table-card" style={{ padding: '1.5rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.5rem' }}>
-              <div>
-                <h3 style={{ fontSize: '1.05rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <ListPlus size={18} className="text-cyan-600" />
-                  <span>Projects List ({content.projectsSection?.items?.length || 0})</span>
-                </h3>
-                <p style={{ fontSize: '0.8rem', color: '#64748b', margin: 0 }}>Add, edit, reorder, or remove landmark villa townships and master-planned projects.</p>
+          {/* Background Views Switcher Images */}
+          <div style={{ marginTop: '1rem', borderTop: '1px solid #f1f5f9', paddingTop: '1.25rem' }}>
+            <h3 style={{ fontSize: '15px', fontWeight: 800, color: '#0f172a', marginBottom: '8px' }}>
+              Hero 3D / Background View Images
+            </h3>
+            <p style={{ fontSize: '13px', color: '#64748b', marginBottom: '14px' }}>
+              Guests can toggle between View 1, View 2, and View 3 on the hero card. You can provide direct image URLs or upload new images.
+            </p>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
+              {/* View 1 */}
+              <div style={{ background: '#f8fafc', padding: '14px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                <span style={{ fontSize: '13px', fontWeight: 800, color: '#1e293b' }}>View 1 (Custom Guesthouse)</span>
+                <input 
+                  type="text" 
+                  className="form-input" 
+                  style={{ marginTop: '6px', marginBottom: '8px', fontSize: '13px' }}
+                  value={content.hero?.bgImages?.custom || ''}
+                  onChange={(e) => setContent(prev => ({
+                    ...prev,
+                    hero: { ...prev.hero, bgImages: { ...prev.hero.bgImages, custom: e.target.value } }
+                  }))}
+                  placeholder="/798129955.jpg"
+                />
+                <button 
+                  type="button" 
+                  className="btn btn-secondary btn-sm"
+                  onClick={() => triggerFileUpload('hero.custom')}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', width: '100%', justifyContent: 'center' }}
+                >
+                  <Upload size={13} /> Upload Image
+                </button>
               </div>
 
-              <button
-                className="btn btn-primary btn-sm"
-                onClick={handleAddProject}
-              >
-                <Plus size={14} />
-                <span>Add New Project</span>
-              </button>
+              {/* View 2 */}
+              <div style={{ background: '#f8fafc', padding: '14px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                <span style={{ fontSize: '13px', fontWeight: 800, color: '#1e293b' }}>View 2 (Estate Exterior)</span>
+                <input 
+                  type="text" 
+                  className="form-input" 
+                  style={{ marginTop: '6px', marginBottom: '8px', fontSize: '13px' }}
+                  value={content.hero?.bgImages?.estate || ''}
+                  onChange={(e) => setContent(prev => ({
+                    ...prev,
+                    hero: { ...prev.hero, bgImages: { ...prev.hero.bgImages, estate: e.target.value } }
+                  }))}
+                  placeholder="/513927625.jpg"
+                />
+                <button 
+                  type="button" 
+                  className="btn btn-secondary btn-sm"
+                  onClick={() => triggerFileUpload('hero.estate')}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', width: '100%', justifyContent: 'center' }}
+                >
+                  <Upload size={13} /> Upload Image
+                </button>
+              </div>
+
+              {/* View 3 */}
+              <div style={{ background: '#f8fafc', padding: '14px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                <span style={{ fontSize: '13px', fontWeight: 800, color: '#1e293b' }}>View 3 (Ambient 3D View)</span>
+                <input 
+                  type="text" 
+                  className="form-input" 
+                  style={{ marginTop: '6px', marginBottom: '8px', fontSize: '13px' }}
+                  value={content.hero?.bgImages?.surreal || ''}
+                  onChange={(e) => setContent(prev => ({
+                    ...prev,
+                    hero: { ...prev.hero, bgImages: { ...prev.hero.bgImages, surreal: e.target.value } }
+                  }))}
+                  placeholder="/798153808.jpg"
+                />
+                <button 
+                  type="button" 
+                  className="btn btn-secondary btn-sm"
+                  onClick={() => triggerFileUpload('hero.surreal')}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', width: '100%', justifyContent: 'center' }}
+                >
+                  <Upload size={13} /> Upload Image
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================= */}
+      {/* TAB 2: RATINGS & STATS                                    */}
+      {/* ========================================================= */}
+      {activeSubTab === 'stats' && (
+        <div style={{ background: '#ffffff', padding: '2rem', borderRadius: '16px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          <div>
+            <h2 style={{ fontSize: '18px', fontWeight: 800, color: '#0f172a', margin: '0 0 4px' }}>
+              Guest Ratings &amp; Stats Banner
+            </h2>
+            <p style={{ fontSize: '13.5px', color: '#64748b', margin: 0 }}>
+              These ratings appear in the prominent 4-pillar banner below the hero card on the homepage.
+            </p>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.25rem' }}>
+            <div style={{ background: '#f8fafc', padding: '16px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+              <label style={{ display: 'block', fontSize: '13px', fontWeight: 800, color: '#0f172a', marginBottom: '6px' }}>
+                Pillar 1: Score &amp; Label
+              </label>
+              <input 
+                type="text" 
+                className="form-input" 
+                value={content.stats?.locationScore || ''} 
+                onChange={(e) => updateSection('stats', 'locationScore', e.target.value)}
+                placeholder="8.8"
+                style={{ fontWeight: 800, fontSize: '16px', marginBottom: '8px' }}
+              />
+              <input 
+                type="text" 
+                className="form-input" 
+                value={content.stats?.locationLabel || ''} 
+                onChange={(e) => updateSection('stats', 'locationLabel', e.target.value)}
+                placeholder="Location"
+              />
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-              {(content.projectsSection?.items || []).map((project, idx) => (
-                <div 
-                  key={project.id || idx} 
-                  style={{ 
-                    background: '#f8fafc', 
-                    border: '1.5px solid #e2e8f0', 
-                    borderRadius: '12px', 
-                    padding: '1.25rem',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '1rem',
-                    boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
-                  }}
+            <div style={{ background: '#f8fafc', padding: '16px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+              <label style={{ display: 'block', fontSize: '13px', fontWeight: 800, color: '#0f172a', marginBottom: '6px' }}>
+                Pillar 2: Score &amp; Label
+              </label>
+              <input 
+                type="text" 
+                className="form-input" 
+                value={content.stats?.wifiScore || ''} 
+                onChange={(e) => updateSection('stats', 'wifiScore', e.target.value)}
+                placeholder="8.8"
+                style={{ fontWeight: 800, fontSize: '16px', marginBottom: '8px' }}
+              />
+              <input 
+                type="text" 
+                className="form-input" 
+                value={content.stats?.wifiLabel || ''} 
+                onChange={(e) => updateSection('stats', 'wifiLabel', e.target.value)}
+                placeholder="Free WiFi"
+              />
+            </div>
+
+            <div style={{ background: '#f8fafc', padding: '16px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+              <label style={{ display: 'block', fontSize: '13px', fontWeight: 800, color: '#0f172a', marginBottom: '6px' }}>
+                Pillar 3: Score &amp; Label
+              </label>
+              <input 
+                type="text" 
+                className="form-input" 
+                value={content.stats?.cleanlinessScore || ''} 
+                onChange={(e) => updateSection('stats', 'cleanlinessScore', e.target.value)}
+                placeholder="7.7"
+                style={{ fontWeight: 800, fontSize: '16px', marginBottom: '8px' }}
+              />
+              <input 
+                type="text" 
+                className="form-input" 
+                value={content.stats?.cleanlinessLabel || ''} 
+                onChange={(e) => updateSection('stats', 'cleanlinessLabel', e.target.value)}
+                placeholder="Cleanliness"
+              />
+            </div>
+
+            <div style={{ background: '#f8fafc', padding: '16px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+              <label style={{ display: 'block', fontSize: '13px', fontWeight: 800, color: '#0f172a', marginBottom: '6px' }}>
+                Pillar 4: Score &amp; Label
+              </label>
+              <input 
+                type="text" 
+                className="form-input" 
+                value={content.stats?.valueScore || ''} 
+                onChange={(e) => updateSection('stats', 'valueScore', e.target.value)}
+                placeholder="7.6"
+                style={{ fontWeight: 800, fontSize: '16px', marginBottom: '8px' }}
+              />
+              <input 
+                type="text" 
+                className="form-input" 
+                value={content.stats?.valueLabel || ''} 
+                onChange={(e) => updateSection('stats', 'valueLabel', e.target.value)}
+                placeholder="Value for Money"
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================= */}
+      {/* TAB 3: ABOUT & WELCOME                                    */}
+      {/* ========================================================= */}
+      {activeSubTab === 'about' && (
+        <div style={{ background: '#ffffff', padding: '2rem', borderRadius: '16px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          <div>
+            <h2 style={{ fontSize: '18px', fontWeight: 800, color: '#0f172a', margin: '0 0 4px' }}>
+              Welcome &amp; About Guesthouse Section
+            </h2>
+            <p style={{ fontSize: '13.5px', color: '#64748b', margin: 0 }}>
+              The introductory card explaining Edion Royal Guesthouse, its family-run hospitality, and top highlights.
+            </p>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.25rem' }}>
+            <div className="form-group">
+              <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
+                Welcome Badge
+              </label>
+              <input 
+                type="text" 
+                className="form-input" 
+                value={content.about?.badge || ''} 
+                onChange={(e) => updateSection('about', 'badge', e.target.value)}
+                placeholder="Welcome"
+              />
+            </div>
+
+            <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+              <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
+                Main Welcome Title
+              </label>
+              <input 
+                type="text" 
+                className="form-input" 
+                value={content.about?.title || ''} 
+                onChange={(e) => updateSection('about', 'title', e.target.value)}
+                placeholder="Comfortable, secure accommodation in the heart of Milnerton"
+              />
+            </div>
+
+            <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+              <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
+                First Paragraph
+              </label>
+              <textarea 
+                rows={3}
+                className="form-input" 
+                value={content.about?.description1 || ''} 
+                onChange={(e) => updateSection('about', 'description1', e.target.value)}
+              />
+            </div>
+
+            <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+              <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
+                Second Paragraph
+              </label>
+              <textarea 
+                rows={3}
+                className="form-input" 
+                value={content.about?.description2 || ''} 
+                onChange={(e) => updateSection('about', 'description2', e.target.value)}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================= */}
+      {/* TAB 4: ROOMS MANAGER (FULL CRUD)                          */}
+      {/* ========================================================= */}
+      {activeSubTab === 'rooms' && (
+        <div style={{ background: '#ffffff', padding: '2rem', borderRadius: '16px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
+            <div>
+              <h2 style={{ fontSize: '18px', fontWeight: 800, color: '#0f172a', margin: '0 0 4px' }}>
+                Rooms Management ({content.roomsSection?.items?.length || 0} Rooms)
+              </h2>
+              <p style={{ fontSize: '13.5px', color: '#64748b', margin: 0 }}>
+                Manage all guesthouse rooms: titles, capacity badges, descriptions, features, pricing, and photo gallery URLs.
+              </p>
+            </div>
+
+            <button 
+              type="button"
+              className="btn btn-primary"
+              onClick={() => {
+                setRoomFormData({
+                  id: 'room-' + Date.now(),
+                  title: '',
+                  badge: '2 Guests',
+                  stats: '',
+                  pricePerNight: 850,
+                  maxGuests: 2,
+                  features: ['Private bathroom', 'Work desk', 'Flat-screen TV'],
+                  imageUrl: 'https://images.unsplash.com/photo-1590490360182-c33d57733427?q=80&w=1200&auto=format&fit=crop'
+                });
+                setIsAddingRoom(true);
+                setSelectedRoomIndex(null);
+              }}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#2563eb', color: '#fff', border: 'none', padding: '9px 16px', borderRadius: '10px', fontWeight: 700 }}
+            >
+              <Plus size={16} />
+              <span>Add New Room</span>
+            </button>
+          </div>
+
+          {/* Section Header Labels */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1rem', background: '#f8fafc', padding: '1rem', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+            <div className="form-group">
+              <label style={{ fontSize: '12.5px', fontWeight: 700, color: '#475569' }}>Section Eyebrow Tag</label>
+              <input 
+                type="text" 
+                className="form-input" 
+                value={content.roomsSection?.tag || ''} 
+                onChange={(e) => updateSection('roomsSection', 'tag', e.target.value)}
+                placeholder="Our rooms"
+              />
+            </div>
+            <div className="form-group">
+              <label style={{ fontSize: '12.5px', fontWeight: 700, color: '#475569' }}>Section Title</label>
+              <input 
+                type="text" 
+                className="form-input" 
+                value={content.roomsSection?.title || ''} 
+                onChange={(e) => updateSection('roomsSection', 'title', e.target.value)}
+                placeholder="Renovated en-suite rooms for every kind of stay"
+              />
+            </div>
+          </div>
+
+          {/* Room Edit/Add Modal/Drawer */}
+          {(isAddingRoom || selectedRoomIndex !== null) && (
+            <div style={{
+              background: '#f8fafc',
+              border: '2px solid #2563eb',
+              borderRadius: '16px',
+              padding: '1.5rem',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '1rem'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <h3 style={{ fontSize: '16px', fontWeight: 800, color: '#1e293b', margin: 0 }}>
+                  {isAddingRoom ? '✨ Add New Room to Guesthouse' : `✏️ Edit Room: ${roomFormData.title}`}
+                </h3>
+                <button 
+                  type="button" 
+                  onClick={() => { setIsAddingRoom(false); setSelectedRoomIndex(null); }}
+                  style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#64748b' }}
                 >
-                  {/* Card Top Row: Project title summary & actions */}
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #e2e8f0', paddingBottom: '0.75rem', flexWrap: 'wrap', gap: '0.5rem' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                      <span style={{ fontWeight: 800, color: '#0f766e', background: '#ccfbf1', padding: '2px 8px', borderRadius: '6px', fontSize: '0.85rem' }}>
-                        #{idx + 1}
+                  <X size={20} />
+                </button>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
+                <div className="form-group">
+                  <label style={{ fontSize: '13px', fontWeight: 700, color: '#334155' }}>Room Title *</label>
+                  <input 
+                    type="text" 
+                    className="form-input" 
+                    value={roomFormData.title} 
+                    onChange={(e) => setRoomFormData({ ...roomFormData, title: e.target.value })}
+                    placeholder="e.g. Renovated Double Room"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label style={{ fontSize: '13px', fontWeight: 700, color: '#334155' }}>Capacity Badge</label>
+                  <input 
+                    type="text" 
+                    className="form-input" 
+                    value={roomFormData.badge} 
+                    onChange={(e) => setRoomFormData({ ...roomFormData, badge: e.target.value })}
+                    placeholder="e.g. 2 Guests · Kitchenette"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label style={{ fontSize: '13px', fontWeight: 700, color: '#334155' }}>Price Per Night (ZAR)</label>
+                  <input 
+                    type="number" 
+                    className="form-input" 
+                    value={roomFormData.pricePerNight || 0} 
+                    onChange={(e) => setRoomFormData({ ...roomFormData, pricePerNight: Number(e.target.value) })}
+                    placeholder="850"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label style={{ fontSize: '13px', fontWeight: 700, color: '#334155' }}>Max Guests</label>
+                  <input 
+                    type="number" 
+                    className="form-input" 
+                    value={roomFormData.maxGuests || 2} 
+                    onChange={(e) => setRoomFormData({ ...roomFormData, maxGuests: Number(e.target.value) })}
+                    placeholder="2"
+                  />
+                </div>
+
+                <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+                  <label style={{ fontSize: '13px', fontWeight: 700, color: '#334155' }}>Description / Stats Text</label>
+                  <textarea 
+                    rows={2}
+                    className="form-input" 
+                    value={roomFormData.stats} 
+                    onChange={(e) => setRoomFormData({ ...roomFormData, stats: e.target.value })}
+                    placeholder="A calm, recently renovated room with a private en-suite bathroom..."
+                  />
+                </div>
+
+                <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+                  <label style={{ fontSize: '13px', fontWeight: 700, color: '#334155' }}>Features (comma separated)</label>
+                  <input 
+                    type="text" 
+                    className="form-input" 
+                    value={Array.isArray(roomFormData.features) ? roomFormData.features.join(', ') : ''} 
+                    onChange={(e) => setRoomFormData({
+                      ...roomFormData,
+                      features: e.target.value.split(',').map(s => s.trim()).filter(Boolean)
+                    })}
+                    placeholder="Private bathroom, Flat-screen TV, Free WiFi, Work desk"
+                  />
+                </div>
+
+                <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+                  <label style={{ fontSize: '13px', fontWeight: 700, color: '#334155' }}>Room Image URL</label>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <input 
+                      type="text" 
+                      className="form-input" 
+                      value={roomFormData.imageUrl} 
+                      onChange={(e) => setRoomFormData({ ...roomFormData, imageUrl: e.target.value })}
+                      placeholder="https://..."
+                    />
+                    <button 
+                      type="button" 
+                      className="btn btn-secondary" 
+                      onClick={() => triggerFileUpload('roomForm')}
+                      style={{ whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                    >
+                      <Upload size={14} /> Upload Image
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '8px' }}>
+                <button 
+                  type="button" 
+                  className="btn btn-secondary"
+                  onClick={() => { setIsAddingRoom(false); setSelectedRoomIndex(null); }}
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="button" 
+                  className="btn btn-primary"
+                  onClick={handleSaveRoom}
+                  style={{ background: '#2563eb', color: '#fff' }}
+                >
+                  Save Room
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Rooms Cards Grid */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1.25rem' }}>
+            {content.roomsSection?.items?.map((room, idx) => (
+              <div 
+                key={room.id || idx}
+                style={{
+                  background: '#ffffff',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '16px',
+                  overflow: 'hidden',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  boxShadow: '0 2px 10px rgba(0,0,0,0.03)'
+                }}
+              >
+                <div style={{ height: '180px', position: 'relative', background: '#f1f5f9' }}>
+                  <img 
+                    src={room.imageUrl || '/798129955.jpg'} 
+                    alt={room.title}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    onError={(e) => { e.target.src = '/798129955.jpg'; }}
+                  />
+                  <span style={{
+                    position: 'absolute',
+                    top: '12px',
+                    left: '12px',
+                    background: 'rgba(15, 23, 42, 0.8)',
+                    color: '#ffffff',
+                    padding: '4px 10px',
+                    borderRadius: '20px',
+                    fontSize: '11px',
+                    fontWeight: 700,
+                    backdropFilter: 'blur(4px)'
+                  }}>
+                    {room.badge || 'Room'}
+                  </span>
+                  {room.pricePerNight ? (
+                    <span style={{
+                      position: 'absolute',
+                      bottom: '12px',
+                      right: '12px',
+                      background: '#2563eb',
+                      color: '#ffffff',
+                      padding: '4px 10px',
+                      borderRadius: '8px',
+                      fontSize: '12px',
+                      fontWeight: 800
+                    }}>
+                      R{room.pricePerNight}/night
+                    </span>
+                  ) : null}
+                </div>
+
+                <div style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', flex: 1 }}>
+                  <h4 style={{ fontSize: '16px', fontWeight: 800, color: '#0f172a', margin: '0 0 6px' }}>
+                    {room.title}
+                  </h4>
+                  <p style={{ fontSize: '13px', color: '#64748b', lineHeight: 1.5, margin: '0 0 10px', flex: 1 }}>
+                    {room.stats}
+                  </p>
+
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginBottom: '14px' }}>
+                    {room.features?.map((f, fi) => (
+                      <span key={fi} style={{ background: '#f1f5f9', color: '#475569', fontSize: '11.5px', padding: '3px 8px', borderRadius: '6px', fontWeight: 600 }}>
+                        {f}
                       </span>
-                      <span style={{ fontWeight: 700, fontSize: '1rem', color: '#0f172a' }}>
-                        {project.title || 'Untitled Project'}
-                      </span>
-                      {project.status && (
-                        <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#b45309', background: '#fef3c7', padding: '2px 8px', borderRadius: '999px' }}>
-                          {project.status}
-                        </span>
-                      )}
-                    </div>
-
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                      <button
-                        className="btn btn-secondary btn-sm"
-                        style={{ padding: '6px 8px' }}
-                        onClick={() => handleMoveProject(idx, -1)}
-                        disabled={idx === 0}
-                        title="Move Up"
-                      >
-                        <ArrowUp size={13} />
-                      </button>
-                      <button
-                        className="btn btn-secondary btn-sm"
-                        style={{ padding: '6px 8px' }}
-                        onClick={() => handleMoveProject(idx, 1)}
-                        disabled={idx === (content.projectsSection?.items?.length || 0) - 1}
-                        title="Move Down"
-                      >
-                        <ArrowDown size={13} />
-                      </button>
-                      <button
-                        className="btn btn-secondary btn-sm"
-                        style={{ padding: '6px 8px', color: '#dc2626', borderColor: '#fca5a5' }}
-                        onClick={() => handleDeleteProject(idx)}
-                        title="Delete Project"
-                      >
-                        <Trash2 size={13} />
-                      </button>
-                    </div>
+                    ))}
                   </div>
 
-                  {/* Project Details Grid: Left Image & Right Fields */}
-                  <div style={{ display: 'grid', gridTemplateColumns: 'minmax(220px, 280px) 1fr', gap: '1.25rem', alignItems: 'start' }}>
-                    {/* Image Column */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                      <label className="form-label" style={{ marginBottom: 0 }}>Project Image / Render</label>
-                      <div style={{ width: '100%', height: '160px', background: '#0f172a', borderRadius: '8px', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', border: '1px solid #cbd5e1' }}>
-                        {project.image ? (
-                          <img 
-                            src={project.image} 
-                            alt={project.title || 'Project'} 
-                            style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-                          />
-                        ) : (
-                          <span style={{ color: '#94a3b8', fontSize: '0.8rem' }}>No image set</span>
-                        )}
-                      </div>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid #f1f5f9', paddingTop: '10px' }}>
+                    <button
+                      type="button"
+                      className="btn btn-secondary btn-sm"
+                      onClick={() => {
+                        setRoomFormData({
+                          ...room,
+                          pricePerNight: room.pricePerNight || 850,
+                          maxGuests: room.maxGuests || 2,
+                          features: room.features || []
+                        });
+                        setSelectedRoomIndex(idx);
+                        setIsAddingRoom(false);
+                      }}
+                      style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                    >
+                      <Edit3 size={13} /> Edit
+                    </button>
 
-                      <div className="form-group" style={{ margin: 0 }}>
-                        <input
-                          type="text"
-                          className="form-input"
-                          style={{ fontSize: '0.8rem' }}
-                          value={project.image || ''}
-                          onChange={(e) => handleUpdateProject(idx, 'image', e.target.value)}
-                          placeholder="Image URL (Cloudinary or Web)"
-                        />
-                      </div>
-
-                      <button
-                        type="button"
-                        className="btn btn-secondary btn-sm"
-                        style={{ width: '100%' }}
-                        onClick={() => handleTriggerUpload(`project_img_${idx}`, 'projects', `Project - ${project.title || 'Image'}`, 'image', { projectIndex: idx })}
-                        disabled={uploadingKey === `project_img_${idx}`}
-                      >
-                        {uploadingKey === `project_img_${idx}` ? (
-                          <>
-                            <Loader2 size={13} className="animate-spin" />
-                            <span>Uploading to Cloudinary...</span>
-                          </>
-                        ) : (
-                          <>
-                            <Upload size={13} />
-                            <span>Upload New Image</span>
-                          </>
-                        )}
-                      </button>
-                    </div>
-
-                    {/* Metadata Column */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                      <div className="form-grid-2">
-                        <div className="form-group" style={{ margin: 0 }}>
-                          <label className="form-label">Project Title</label>
-                          <input
-                            type="text"
-                            className="form-input"
-                            value={project.title || ''}
-                            onChange={(e) => handleUpdateProject(idx, 'title', e.target.value)}
-                            placeholder="e.g. Maytri Ambhuja"
-                          />
-                        </div>
-
-                        <div className="form-group" style={{ margin: 0 }}>
-                          <label className="form-label">Tagline / Subheading</label>
-                          <input
-                            type="text"
-                            className="form-input"
-                            value={project.tagline || ''}
-                            onChange={(e) => handleUpdateProject(idx, 'tagline', e.target.value)}
-                            placeholder="e.g. Flagship 55-Acre Villa Township"
-                          />
-                        </div>
-                      </div>
-
-                      <div className="form-grid-2">
-                        <div className="form-group" style={{ margin: 0 }}>
-                          <label className="form-label">Location</label>
-                          <input
-                            type="text"
-                            className="form-input"
-                            value={project.location || ''}
-                            onChange={(e) => handleUpdateProject(idx, 'location', e.target.value)}
-                            placeholder="e.g. Sanghi City, Near ORR Exit 11, Hyderabad"
-                          />
-                        </div>
-
-                        <div className="form-group" style={{ margin: 0 }}>
-                          <label className="form-label">Status Badge</label>
-                          <input
-                            type="text"
-                            className="form-input"
-                            value={project.status || ''}
-                            onChange={(e) => handleUpdateProject(idx, 'status', e.target.value)}
-                            placeholder="e.g. Ready for VIP Booking"
-                          />
-                        </div>
-                      </div>
-
-                      <div className="form-group" style={{ margin: 0 }}>
-                        <label className="form-label">CTA Button Text</label>
-                        <input
-                          type="text"
-                          className="form-input"
-                          value={project.buttonText || ''}
-                          onChange={(e) => handleUpdateProject(idx, 'buttonText', e.target.value)}
-                          placeholder="e.g. For More Info"
-                        />
-                      </div>
-                    </div>
+                    <button
+                      type="button"
+                      className="btn btn-sm"
+                      onClick={() => handleDeleteRoom(idx)}
+                      style={{ color: '#ef4444', background: '#fef2f2', border: '1px solid #fee2e2', borderRadius: '8px', padding: '5px 10px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px', fontSize: '12px', fontWeight: 700 }}
+                    >
+                      <Trash2 size={13} /> Delete
+                    </button>
                   </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
-                  {/* Specifications and Features Split Row */}
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem', marginTop: '0.25rem', paddingTop: '0.75rem', borderTop: '1px dashed #cbd5e1' }}>
-                    {/* Specifications List */}
-                    <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '0.85rem' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.6rem' }}>
-                        <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#334155' }}>
-                          Specifications ({project.specs?.length || 0})
-                        </span>
-                        <button
-                          type="button"
-                          className="btn btn-secondary btn-sm"
-                          style={{ padding: '3px 8px', fontSize: '0.75rem' }}
-                          onClick={() => handleAddSpec(idx)}
-                        >
-                          <Plus size={12} />
-                          <span>Add Spec</span>
-                        </button>
-                      </div>
+      {/* ========================================================= */}
+      {/* TAB 5: INCLUSIONS & GUARANTEES                            */}
+      {/* ========================================================= */}
+      {activeSubTab === 'inclusions' && (
+        <div style={{ background: '#ffffff', padding: '2rem', borderRadius: '16px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          <div>
+            <h2 style={{ fontSize: '18px', fontWeight: 800, color: '#0f172a', margin: '0 0 4px' }}>
+              Standard Room Inclusions
+            </h2>
+            <p style={{ fontSize: '13.5px', color: '#64748b', margin: 0 }}>
+              The standard inclusions guaranteed across every single room at Edion Royal Guesthouse.
+            </p>
+          </div>
 
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                        {(project.specs || []).map((spec, sIdx) => (
-                          <div key={sIdx} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: '0.4rem', alignItems: 'center' }}>
-                            <input
-                              type="text"
-                              className="form-input"
-                              style={{ padding: '4px 8px', fontSize: '0.8rem' }}
-                              value={spec.label || ''}
-                              onChange={(e) => handleUpdateSpec(idx, sIdx, 'label', e.target.value)}
-                              placeholder="Label (e.g. Project Area)"
-                            />
-                            <input
-                              type="text"
-                              className="form-input"
-                              style={{ padding: '4px 8px', fontSize: '0.8rem' }}
-                              value={spec.value || ''}
-                              onChange={(e) => handleUpdateSpec(idx, sIdx, 'value', e.target.value)}
-                              placeholder="Value (e.g. 55 Acres)"
-                            />
-                            <button
-                              type="button"
-                              className="btn btn-secondary btn-sm"
-                              style={{ padding: '4px 6px', color: '#dc2626' }}
-                              onClick={() => handleDeleteSpec(idx, sIdx)}
-                              title="Remove Spec"
-                            >
-                              <Trash2 size={12} />
-                            </button>
-                          </div>
-                        ))}
-                        {(!project.specs || project.specs.length === 0) && (
-                          <div style={{ fontSize: '0.78rem', color: '#94a3b8', fontStyle: 'italic', padding: '4px 0' }}>
-                            No specifications added yet. Click &quot;Add Spec&quot; above.
-                          </div>
-                        )}
-                      </div>
-                    </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.25rem' }}>
+            <div className="form-group">
+              <label style={{ fontSize: '13px', fontWeight: 700, color: '#334155' }}>Badge</label>
+              <input 
+                type="text" 
+                className="form-input" 
+                value={content.inclusions?.badge || ''} 
+                onChange={(e) => updateSection('inclusions', 'badge', e.target.value)}
+                placeholder="Standard Inclusions"
+              />
+            </div>
 
-                    {/* Key Features Bullet List */}
-                    <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '0.85rem' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.6rem' }}>
-                        <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#334155' }}>
-                          Key Features ({project.features?.length || 0})
-                        </span>
-                        <button
-                          type="button"
-                          className="btn btn-secondary btn-sm"
-                          style={{ padding: '3px 8px', fontSize: '0.75rem' }}
-                          onClick={() => handleAddFeature(idx)}
-                        >
-                          <Plus size={12} />
-                          <span>Add Feature</span>
-                        </button>
-                      </div>
+            <div className="form-group">
+              <label style={{ fontSize: '13px', fontWeight: 700, color: '#334155' }}>Headline</label>
+              <input 
+                type="text" 
+                className="form-input" 
+                value={content.inclusions?.title || ''} 
+                onChange={(e) => updateSection('inclusions', 'title', e.target.value)}
+                placeholder="Included in every room at Edion Royal"
+              />
+            </div>
 
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                        {(project.features || []).map((feat, fIdx) => (
-                          <div key={fIdx} style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '0.4rem', alignItems: 'center' }}>
-                            <input
-                              type="text"
-                              className="form-input"
-                              style={{ padding: '4px 8px', fontSize: '0.8rem' }}
-                              value={feat || ''}
-                              onChange={(e) => handleUpdateFeature(idx, fIdx, e.target.value)}
-                              placeholder="Feature highlight (e.g. RERA: P02400007647)"
-                            />
-                            <button
-                              type="button"
-                              className="btn btn-secondary btn-sm"
-                              style={{ padding: '4px 6px', color: '#dc2626' }}
-                              onClick={() => handleDeleteFeature(idx, fIdx)}
-                              title="Remove Feature"
-                            >
-                              <Trash2 size={12} />
-                            </button>
-                          </div>
-                        ))}
-                        {(!project.features || project.features.length === 0) && (
-                          <div style={{ fontSize: '0.78rem', color: '#94a3b8', fontStyle: 'italic', padding: '4px 0' }}>
-                            No key features added yet. Click &quot;Add Feature&quot; above.
-                          </div>
-                        )}
-                      </div>
-                    </div>
+            <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+              <label style={{ fontSize: '13px', fontWeight: 700, color: '#334155' }}>Description</label>
+              <textarea 
+                rows={2}
+                className="form-input" 
+                value={content.inclusions?.description || ''} 
+                onChange={(e) => updateSection('inclusions', 'description', e.target.value)}
+              />
+            </div>
+          </div>
+
+          {/* 3 Inclusions Cards */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem', marginTop: '0.5rem' }}>
+            {content.inclusions?.items?.map((item, idx) => (
+              <div key={idx} style={{ background: '#f8fafc', padding: '16px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                <span style={{ fontSize: '12px', fontWeight: 800, color: '#2563eb' }}>Inclusion {idx + 1}</span>
+                <input 
+                  type="text" 
+                  className="form-input" 
+                  style={{ marginTop: '6px', marginBottom: '8px', fontWeight: 700 }}
+                  value={item.title} 
+                  onChange={(e) => {
+                    const items = [...(content.inclusions?.items || [])];
+                    items[idx].title = e.target.value;
+                    setContent(prev => ({ ...prev, inclusions: { ...prev.inclusions, items } }));
+                  }}
+                  placeholder="e.g. Private Bathroom"
+                />
+                <textarea 
+                  rows={2}
+                  className="form-input" 
+                  value={item.desc} 
+                  onChange={(e) => {
+                    const items = [...(content.inclusions?.items || [])];
+                    items[idx].desc = e.target.value;
+                    setContent(prev => ({ ...prev, inclusions: { ...prev.inclusions, items } }));
+                  }}
+                  placeholder="Spotless private en-suite bathroom..."
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================= */}
+      {/* TAB 6: AMENITIES DIRECTORY (FULL CRUD)                    */}
+      {/* ========================================================= */}
+      {activeSubTab === 'amenities' && (
+        <div style={{ background: '#ffffff', padding: '2rem', borderRadius: '16px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
+            <div>
+              <h2 style={{ fontSize: '18px', fontWeight: 800, color: '#0f172a', margin: '0 0 4px' }}>
+                Amenities Directory ({content.amenitiesSection?.items?.length || 0} Amenities)
+              </h2>
+              <p style={{ fontSize: '13.5px', color: '#64748b', margin: 0 }}>
+                Manage all guesthouse amenities shown on the Amenities page and Homepage.
+              </p>
+            </div>
+
+            <button 
+              type="button" 
+              className="btn btn-primary"
+              onClick={() => {
+                setAmenityFormData({
+                  id: 'amenity-' + Date.now(),
+                  name: '',
+                  category: 'Comfort',
+                  desc: '',
+                  icon: 'Wifi'
+                });
+                setIsAddingAmenity(true);
+                setSelectedAmenityIndex(null);
+              }}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#2563eb', color: '#fff', border: 'none', padding: '9px 16px', borderRadius: '10px', fontWeight: 700 }}
+            >
+              <Plus size={16} />
+              <span>Add New Amenity</span>
+            </button>
+          </div>
+
+          {/* Amenity Edit/Add Box */}
+          {(isAddingAmenity || selectedAmenityIndex !== null) && (
+            <div style={{
+              background: '#f8fafc',
+              border: '2px solid #2563eb',
+              borderRadius: '16px',
+              padding: '1.5rem',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '1rem'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <h3 style={{ fontSize: '16px', fontWeight: 800, color: '#1e293b', margin: 0 }}>
+                  {isAddingAmenity ? '✨ Add Amenity' : `✏️ Edit Amenity: ${amenityFormData.name}`}
+                </h3>
+                <button 
+                  type="button" 
+                  onClick={() => { setIsAddingAmenity(false); setSelectedAmenityIndex(null); }}
+                  style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#64748b' }}
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1rem' }}>
+                <div className="form-group">
+                  <label style={{ fontSize: '13px', fontWeight: 700, color: '#334155' }}>Amenity Name *</label>
+                  <input 
+                    type="text" 
+                    className="form-input" 
+                    value={amenityFormData.name} 
+                    onChange={(e) => setAmenityFormData({ ...amenityFormData, name: e.target.value })}
+                    placeholder="e.g. Free high-speed WiFi"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label style={{ fontSize: '13px', fontWeight: 700, color: '#334155' }}>Category</label>
+                  <input 
+                    type="text" 
+                    className="form-input" 
+                    value={amenityFormData.category} 
+                    onChange={(e) => setAmenityFormData({ ...amenityFormData, category: e.target.value })}
+                    placeholder="e.g. Connectivity"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label style={{ fontSize: '13px', fontWeight: 700, color: '#334155' }}>Icon</label>
+                  <select 
+                    className="form-input"
+                    value={amenityFormData.icon}
+                    onChange={(e) => setAmenityFormData({ ...amenityFormData, icon: e.target.value })}
+                  >
+                    {AVAILABLE_ICONS.map(ic => (
+                      <option key={ic} value={ic}>{ic}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+                  <label style={{ fontSize: '13px', fontWeight: 700, color: '#334155' }}>Description</label>
+                  <input 
+                    type="text" 
+                    className="form-input" 
+                    value={amenityFormData.desc} 
+                    onChange={(e) => setAmenityFormData({ ...amenityFormData, desc: e.target.value })}
+                    placeholder="Reliable connection for work and streaming."
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+                <button 
+                  type="button" 
+                  className="btn btn-secondary"
+                  onClick={() => { setIsAddingAmenity(false); setSelectedAmenityIndex(null); }}
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="button" 
+                  className="btn btn-primary"
+                  onClick={handleSaveAmenity}
+                  style={{ background: '#2563eb', color: '#fff' }}
+                >
+                  Save Amenity
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Amenities Grid */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1rem' }}>
+            {content.amenitiesSection?.items?.map((amenity, idx) => (
+              <div 
+                key={amenity.id || idx}
+                style={{
+                  background: '#f8fafc',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '12px',
+                  padding: '16px',
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  justifyContent: 'space-between',
+                  gap: '12px'
+                }}
+              >
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                    <span style={{ fontSize: '11px', background: '#dbeafe', color: '#1d4ed8', padding: '2px 8px', borderRadius: '4px', fontWeight: 700 }}>
+                      {amenity.icon || 'Wifi'}
+                    </span>
+                    <span style={{ fontSize: '11.5px', color: '#64748b' }}>{amenity.category}</span>
                   </div>
+                  <h4 style={{ fontSize: '15px', fontWeight: 800, color: '#0f172a', margin: '0 0 4px' }}>
+                    {amenity.name}
+                  </h4>
+                  <p style={{ fontSize: '13px', color: '#64748b', margin: 0, lineHeight: 1.4 }}>
+                    {amenity.desc}
+                  </p>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAmenityFormData({ ...amenity });
+                      setSelectedAmenityIndex(idx);
+                      setIsAddingAmenity(false);
+                    }}
+                    style={{ background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '6px', padding: '5px', cursor: 'pointer', color: '#334155' }}
+                    title="Edit amenity"
+                  >
+                    <Edit3 size={13} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteAmenity(idx)}
+                    style={{ background: '#fef2f2', border: '1px solid #fee2e2', borderRadius: '6px', padding: '5px', cursor: 'pointer', color: '#ef4444' }}
+                    title="Delete amenity"
+                  >
+                    <Trash2 size={13} />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================= */}
+      {/* TAB 7: LOCATION & NEARBY DISTANCES                        */}
+      {/* ========================================================= */}
+      {activeSubTab === 'location' && (
+        <div style={{ background: '#ffffff', padding: '2rem', borderRadius: '16px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          <div>
+            <h2 style={{ fontSize: '18px', fontWeight: 800, color: '#0f172a', margin: '0 0 4px' }}>
+              Location, Address &amp; Key Landmarks
+            </h2>
+            <p style={{ fontSize: '13.5px', color: '#64748b', margin: 0 }}>
+              Edit guesthouse address, travel times to Milnerton Beach, CTICC, Airport, and the Google Maps embed URL.
+            </p>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.25rem' }}>
+            <div className="form-group">
+              <label style={{ fontSize: '13px', fontWeight: 700, color: '#334155' }}>Section Headline</label>
+              <input 
+                type="text" 
+                className="form-input" 
+                value={content.locationSection?.title || ''} 
+                onChange={(e) => updateSection('locationSection', 'title', e.target.value)}
+                placeholder="Table Mountain views, minutes from your door"
+              />
+            </div>
+
+            <div className="form-group">
+              <label style={{ fontSize: '13px', fontWeight: 700, color: '#334155' }}>Guesthouse Physical Address</label>
+              <input 
+                type="text" 
+                className="form-input" 
+                value={content.locationSection?.address || ''} 
+                onChange={(e) => updateSection('locationSection', 'address', e.target.value)}
+                placeholder="7 Arum Street, Milnerton, Cape Town, 7441"
+              />
+            </div>
+
+            <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+              <label style={{ fontSize: '13px', fontWeight: 700, color: '#334155' }}>Directions / Address Paragraph 1</label>
+              <textarea 
+                rows={2}
+                className="form-input" 
+                value={content.locationSection?.addressDetails1 || ''} 
+                onChange={(e) => updateSection('locationSection', 'addressDetails1', e.target.value)}
+              />
+            </div>
+
+            <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+              <label style={{ fontSize: '13px', fontWeight: 700, color: '#334155' }}>Directions / Address Paragraph 2</label>
+              <textarea 
+                rows={2}
+                className="form-input" 
+                value={content.locationSection?.addressDetails2 || ''} 
+                onChange={(e) => updateSection('locationSection', 'addressDetails2', e.target.value)}
+              />
+            </div>
+
+            <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+              <label style={{ fontSize: '13px', fontWeight: 700, color: '#334155' }}>Google Maps Embed URL</label>
+              <input 
+                type="text" 
+                className="form-input" 
+                value={content.locationSection?.mapEmbedUrl || ''} 
+                onChange={(e) => updateSection('locationSection', 'mapEmbedUrl', e.target.value)}
+                placeholder="https://maps.google.com/..."
+              />
+            </div>
+          </div>
+
+          {/* Key Destinations & Driving Times */}
+          <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: '1.25rem' }}>
+            <h3 style={{ fontSize: '15px', fontWeight: 800, color: '#0f172a', marginBottom: '8px' }}>
+              Key Destinations &amp; Drive Times ({content.locationSection?.distances?.length || 0})
+            </h3>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1rem' }}>
+              {content.locationSection?.distances?.map((dist, idx) => (
+                <div key={idx} style={{ background: '#f8fafc', padding: '14px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                  <input 
+                    type="text" 
+                    className="form-input" 
+                    style={{ marginBottom: '6px', fontWeight: 700 }}
+                    value={dist.name} 
+                    onChange={(e) => {
+                      const distances = [...(content.locationSection?.distances || [])];
+                      distances[idx].name = e.target.value;
+                      setContent(prev => ({ ...prev, locationSection: { ...prev.locationSection, distances } }));
+                    }}
+                    placeholder="e.g. Milnerton Beach"
+                  />
+                  <input 
+                    type="text" 
+                    className="form-input" 
+                    value={dist.distance} 
+                    onChange={(e) => {
+                      const distances = [...(content.locationSection?.distances || [])];
+                      distances[idx].distance = e.target.value;
+                      setContent(prev => ({ ...prev, locationSection: { ...prev.locationSection, distances } }));
+                    }}
+                    placeholder="e.g. 1.8 km (3 mins)"
+                  />
                 </div>
               ))}
-
-              {(!content.projectsSection?.items || content.projectsSection.items.length === 0) && (
-                <div style={{ textAlign: 'center', padding: '2rem', color: '#64748b' }}>
-                  No projects currently configured. Click &quot;Add New Project&quot; above to create one.
-                </div>
-              )}
             </div>
           </div>
         </div>
       )}
 
-      {/* TAB 3: RESORT-STYLE AMENITIES MANAGER */}
-      {activeSubTab === 'amenities' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-          {/* Section Header Controls */}
-          <div className="table-card" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-            <h3 style={{ fontSize: '1.05rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <Sparkles size={18} className="text-cyan-600" />
-              <span>Resort-Style Conveniences Header Settings</span>
-            </h3>
-
-            <div className="form-grid-2">
-              <div className="form-group">
-                <label className="form-label">Section Eyebrow Badge</label>
-                <input
-                  type="text"
-                  className="form-input"
-                  value={content.amenitiesSection?.eyebrowTag || ''}
-                  onChange={(e) => setContent({ ...content, amenitiesSection: { ...(content.amenitiesSection || {}), eyebrowTag: e.target.value } })}
-                  placeholder="RESORT-STYLE CONVENIENCES"
-                />
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">Section Main Title</label>
-                <input
-                  type="text"
-                  className="form-input"
-                  value={content.amenitiesSection?.title || ''}
-                  onChange={(e) => setContent({ ...content, amenitiesSection: { ...(content.amenitiesSection || {}), title: e.target.value } })}
-                  placeholder="Amenities"
-                />
-              </div>
+      {/* ========================================================= */}
+      {/* TAB 8: GUEST REVIEWS (FULL CRUD)                          */}
+      {/* ========================================================= */}
+      {activeSubTab === 'reviews' && (
+        <div style={{ background: '#ffffff', padding: '2rem', borderRadius: '16px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
+            <div>
+              <h2 style={{ fontSize: '18px', fontWeight: 800, color: '#0f172a', margin: '0 0 4px' }}>
+                Guest Reviews ({content.reviewsSection?.items?.length || 0} Testimonials)
+              </h2>
+              <p style={{ fontSize: '13.5px', color: '#64748b', margin: 0 }}>
+                Manage genuine guest reviews displayed in the homepage testimonial carousel.
+              </p>
             </div>
 
-            <div className="form-group">
-              <label className="form-label">Section Subtitle</label>
-              <textarea
-                className="form-textarea"
-                rows={2}
-                value={content.amenitiesSection?.subtitle || ''}
-                onChange={(e) => setContent({ ...content, amenitiesSection: { ...(content.amenitiesSection || {}), subtitle: e.target.value } })}
-                placeholder="A comprehensive suite of modern lifestyle, wellness, sports, and daily conveniences curated for all age groups."
-              />
-            </div>
+            <button 
+              type="button" 
+              className="btn btn-primary"
+              onClick={() => {
+                setReviewFormData({
+                  id: Date.now(),
+                  name: '',
+                  location: 'South Africa',
+                  rating: 5.0,
+                  initials: '',
+                  quote: ''
+                });
+                setIsAddingReview(true);
+                setSelectedReviewIndex(null);
+              }}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#2563eb', color: '#fff', border: 'none', padding: '9px 16px', borderRadius: '10px', fontWeight: 700 }}
+            >
+              <Plus size={16} />
+              <span>Add Guest Review</span>
+            </button>
           </div>
 
-          {/* Dynamic Amenities List Editor */}
-          <div className="table-card" style={{ padding: '1.5rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.5rem' }}>
-              <div>
-                <h3 style={{ fontSize: '1.05rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <ListPlus size={18} className="text-cyan-600" />
-                  <span>Amenities Grid Items ({content.amenitiesSection?.items?.length || 0})</span>
+          {/* Add/Edit Review Drawer */}
+          {(isAddingReview || selectedReviewIndex !== null) && (
+            <div style={{
+              background: '#f8fafc',
+              border: '2px solid #2563eb',
+              borderRadius: '16px',
+              padding: '1.5rem',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '1rem'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <h3 style={{ fontSize: '16px', fontWeight: 800, color: '#1e293b', margin: 0 }}>
+                  {isAddingReview ? '✨ Add Review' : `✏️ Edit Review by ${reviewFormData.name}`}
                 </h3>
-                <p style={{ fontSize: '0.8rem', color: '#64748b', margin: 0 }}>Add, edit, reorder or remove individual township amenities displayed on the site.</p>
+                <button 
+                  type="button" 
+                  onClick={() => { setIsAddingReview(false); setSelectedReviewIndex(null); }}
+                  style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#64748b' }}
+                >
+                  <X size={20} />
+                </button>
               </div>
 
-              <button
-                className="btn btn-primary btn-sm"
-                onClick={handleAddAmenity}
-              >
-                <Plus size={14} />
-                <span>Add New Amenity</span>
-              </button>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1rem' }}>
+                <div className="form-group">
+                  <label style={{ fontSize: '13px', fontWeight: 700, color: '#334155' }}>Guest Name *</label>
+                  <input 
+                    type="text" 
+                    className="form-input" 
+                    value={reviewFormData.name} 
+                    onChange={(e) => setReviewFormData({ ...reviewFormData, name: e.target.value })}
+                    placeholder="e.g. Lerato S."
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label style={{ fontSize: '13px', fontWeight: 700, color: '#334155' }}>Guest Location</label>
+                  <input 
+                    type="text" 
+                    className="form-input" 
+                    value={reviewFormData.location} 
+                    onChange={(e) => setReviewFormData({ ...reviewFormData, location: e.target.value })}
+                    placeholder="e.g. Pretoria"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label style={{ fontSize: '13px', fontWeight: 700, color: '#334155' }}>Rating (1 - 5)</label>
+                  <input 
+                    type="number" 
+                    step="0.1"
+                    min="1"
+                    max="5"
+                    className="form-input" 
+                    value={reviewFormData.rating} 
+                    onChange={(e) => setReviewFormData({ ...reviewFormData, rating: Number(e.target.value) })}
+                    placeholder="5.0"
+                  />
+                </div>
+
+                <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+                  <label style={{ fontSize: '13px', fontWeight: 700, color: '#334155' }}>Review Quote *</label>
+                  <textarea 
+                    rows={3}
+                    className="form-input" 
+                    value={reviewFormData.quote} 
+                    onChange={(e) => setReviewFormData({ ...reviewFormData, quote: e.target.value })}
+                    placeholder="The kitchenette made our week-long stay so much easier..."
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+                <button 
+                  type="button" 
+                  className="btn btn-secondary"
+                  onClick={() => { setIsAddingReview(false); setSelectedReviewIndex(null); }}
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="button" 
+                  className="btn btn-primary"
+                  onClick={handleSaveReview}
+                  style={{ background: '#2563eb', color: '#fff' }}
+                >
+                  Save Review
+                </button>
+              </div>
             </div>
+          )}
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              {(content.amenitiesSection?.items || []).map((item, idx) => (
-                <div key={idx} style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '1rem', display: 'grid', gridTemplateColumns: 'auto 1fr 140px 140px auto', gap: '0.75rem', alignItems: 'center' }}>
-                  <span style={{ fontWeight: 800, color: '#64748b', width: '24px', textAlign: 'center' }}>#{idx + 1}</span>
-
-                  <div className="form-group" style={{ margin: 0 }}>
-                    <input
-                      type="text"
-                      className="form-input"
-                      value={item.name || ''}
-                      onChange={(e) => handleUpdateAmenity(idx, 'name', e.target.value)}
-                      placeholder="Amenity Name (e.g. Swimming Pool)"
-                    />
-                  </div>
-
-                  <div className="form-group" style={{ margin: 0 }}>
-                    <input
-                      type="text"
-                      className="form-input"
-                      value={item.category || ''}
-                      onChange={(e) => handleUpdateAmenity(idx, 'category', e.target.value)}
-                      placeholder="Category (e.g. Wellness)"
-                    />
-                  </div>
-
-                  <div className="form-group" style={{ margin: 0 }}>
-                    <select
-                      className="form-input"
-                      value={item.iconName || 'Sparkles'}
-                      onChange={(e) => handleUpdateAmenity(idx, 'iconName', e.target.value)}
-                    >
-                      {AVAILABLE_ICONS.map((icon) => (
-                        <option key={icon} value={icon}>{icon}</option>
+          {/* Reviews List */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1rem' }}>
+            {content.reviewsSection?.items?.map((rev, idx) => (
+              <div 
+                key={rev.id || idx}
+                style={{
+                  background: '#f8fafc',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '14px',
+                  padding: '1.25rem',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
+                  gap: '12px'
+                }}
+              >
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                    <div style={{ display: 'flex', gap: '3px' }}>
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} size={14} fill="#f59e0b" color="#f59e0b" />
                       ))}
-                    </select>
+                    </div>
+                    <span style={{ fontSize: '12px', background: '#fef3c7', color: '#92400e', padding: '2px 6px', borderRadius: '4px', fontWeight: 800 }}>
+                      {rev.rating || '5.0'}
+                    </span>
                   </div>
 
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                  <p style={{ fontSize: '13.5px', color: '#334155', fontStyle: 'italic', margin: 0, lineHeight: 1.5 }}>
+                    “{rev.quote}”
+                  </p>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid #e2e8f0', paddingTop: '10px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#2563eb', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '12px' }}>
+                      {rev.initials || rev.name?.substring(0, 2) || 'GR'}
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '13px', fontWeight: 800, color: '#0f172a' }}>{rev.name}</div>
+                      <div style={{ fontSize: '11.5px', color: '#64748b' }}>{rev.location}</div>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '4px' }}>
                     <button
-                      className="btn btn-secondary btn-sm"
-                      style={{ padding: '6px 8px' }}
-                      onClick={() => handleMoveAmenity(idx, -1)}
-                      disabled={idx === 0}
-                      title="Move Up"
+                      type="button"
+                      onClick={() => {
+                        setReviewFormData({ ...rev });
+                        setSelectedReviewIndex(idx);
+                        setIsAddingReview(false);
+                      }}
+                      style={{ background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '6px', padding: '5px', cursor: 'pointer', color: '#334155' }}
                     >
-                      <ArrowUp size={13} />
+                      <Edit3 size={13} />
                     </button>
                     <button
-                      className="btn btn-secondary btn-sm"
-                      style={{ padding: '6px 8px' }}
-                      onClick={() => handleMoveAmenity(idx, 1)}
-                      disabled={idx === (content.amenitiesSection?.items?.length || 0) - 1}
-                      title="Move Down"
-                    >
-                      <ArrowDown size={13} />
-                    </button>
-                    <button
-                      className="btn btn-secondary btn-sm"
-                      style={{ padding: '6px 8px', color: '#dc2626', borderColor: '#fca5a5' }}
-                      onClick={() => handleDeleteAmenity(idx)}
-                      title="Delete Amenity"
+                      type="button"
+                      onClick={() => handleDeleteReview(idx)}
+                      style={{ background: '#fef2f2', border: '1px solid #fee2e2', borderRadius: '6px', padding: '5px', cursor: 'pointer', color: '#ef4444' }}
                     >
                       <Trash2 size={13} />
                     </button>
                   </div>
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
         </div>
       )}
 
-      {/* TAB 4: HERO & HEADLINE COPY */}
-      {activeSubTab === 'hero' && (
-        <div className="table-card" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-          <h3 style={{ fontSize: '1.05rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <Sparkles size={18} className="text-cyan-600" />
-            <span>Hero Headline &amp; Slogan Configuration</span>
-          </h3>
-
-          <div className="form-grid-2">
-            <div className="form-group">
-              <label className="form-label">Developer Eyebrow Badge</label>
-              <input
-                type="text"
-                className="form-input"
-                value={content.hero?.eyebrowBadge || ''}
-                onChange={(e) => setContent({ ...content, hero: { ...content.hero, eyebrowBadge: e.target.value } })}
-              />
-            </div>
-
-            <div className="form-group">
-              <label className="form-label">Telangana RERA Registration Number</label>
-              <input
-                type="text"
-                className="form-input"
-                value={content.hero?.reraNumber || ''}
-                onChange={(e) => setContent({ ...content, hero: { ...content.hero, reraNumber: e.target.value } })}
-              />
-            </div>
-          </div>
-
-          <div className="form-group">
-            <label className="form-label">Primary Hero H1 Title</label>
-            <input
-              type="text"
-              className="form-input"
-              value={content.hero?.title || ''}
-              onChange={(e) => setContent({ ...content, hero: { ...content.hero, title: e.target.value } })}
-            />
-          </div>
-
-          <div className="form-group">
-            <label className="form-label">Hero Subheading</label>
-            <input
-              type="text"
-              className="form-input"
-              value={content.hero?.subheading || ''}
-              onChange={(e) => setContent({ ...content, hero: { ...content.hero, subheading: e.target.value } })}
-            />
-          </div>
-
-          <div className="form-group">
-            <label className="form-label">Hero Supporting Description</label>
-            <textarea
-              className="form-textarea"
-              rows={3}
-              value={content.hero?.description || ''}
-              onChange={(e) => setContent({ ...content, hero: { ...content.hero, description: e.target.value } })}
-            />
-          </div>
-
-          <div className="form-grid-2">
-            <div className="form-group">
-              <label className="form-label">Starting Villa Price</label>
-              <input
-                type="text"
-                className="form-input"
-                value={content.hero?.startingPrice || ''}
-                onChange={(e) => setContent({ ...content, hero: { ...content.hero, startingPrice: e.target.value } })}
-              />
-            </div>
-
-            <div className="form-group">
-              <label className="form-label">Token Advance Booking Amount</label>
-              <input
-                type="text"
-                className="form-input"
-                value={content.hero?.tokenAdvance || ''}
-                onChange={(e) => setContent({ ...content, hero: { ...content.hero, tokenAdvance: e.target.value } })}
-              />
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* TAB 5: ABOUT & TOWNSHIP STATS */}
-      {activeSubTab === 'about' && (
-        <div className="table-card" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-          <h3 style={{ fontSize: '1.05rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <Building size={18} className="text-cyan-600" />
-            <span>About Section &amp; Township Statistics</span>
-          </h3>
-
-          <div className="form-group">
-            <label className="form-label">About Section Title</label>
-            <input
-              type="text"
-              className="form-input"
-              value={content.about?.sectionTitle || ''}
-              onChange={(e) => setContent({ ...content, about: { ...content.about, sectionTitle: e.target.value } })}
-            />
-          </div>
-
-          <div className="form-group">
-            <label className="form-label">About Tagline</label>
-            <input
-              type="text"
-              className="form-input"
-              value={content.about?.tagline || ''}
-              onChange={(e) => setContent({ ...content, about: { ...content.about, tagline: e.target.value } })}
-            />
-          </div>
-
-          <div className="form-group">
-            <label className="form-label">Description Paragraph 1</label>
-            <textarea
-              className="form-textarea"
-              rows={3}
-              value={content.about?.description1 || ''}
-              onChange={(e) => setContent({ ...content, about: { ...content.about, description1: e.target.value } })}
-            />
-          </div>
-
-          <div className="form-group">
-            <label className="form-label">Description Paragraph 2</label>
-            <textarea
-              className="form-textarea"
-              rows={3}
-              value={content.about?.description2 || ''}
-              onChange={(e) => setContent({ ...content, about: { ...content.about, description2: e.target.value } })}
-            />
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
-            <div className="form-group">
-              <label className="form-label">Total Villas Stat</label>
-              <input
-                type="text"
-                className="form-input"
-                value={content.about?.totalVillas || ''}
-                onChange={(e) => setContent({ ...content, about: { ...content.about, totalVillas: e.target.value } })}
-              />
-            </div>
-
-            <div className="form-group">
-              <label className="form-label">Total Acres Stat</label>
-              <input
-                type="text"
-                className="form-input"
-                value={content.about?.totalAcres || ''}
-                onChange={(e) => setContent({ ...content, about: { ...content.about, totalAcres: e.target.value } })}
-              />
-            </div>
-
-            <div className="form-group">
-              <label className="form-label">Clubhouse Size Stat</label>
-              <input
-                type="text"
-                className="form-input"
-                value={content.about?.clubhouseSize || ''}
-                onChange={(e) => setContent({ ...content, about: { ...content.about, clubhouseSize: e.target.value } })}
-              />
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* TAB 6: CLUBHOUSE COPY */}
-      {activeSubTab === 'clubhouse' && (
-        <div className="table-card" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-          <h3 style={{ fontSize: '1.05rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <Layers size={18} className="text-cyan-600" />
-            <span>Clubhouse &amp; Amenities Copy</span>
-          </h3>
-
-          <div className="form-group">
-            <label className="form-label">Clubhouse Title</label>
-            <input
-              type="text"
-              className="form-input"
-              value={content.clubhouse?.title || ''}
-              onChange={(e) => setContent({ ...content, clubhouse: { ...content.clubhouse, title: e.target.value } })}
-            />
-          </div>
-
-          <div className="form-group">
-            <label className="form-label">Clubhouse Tagline</label>
-            <input
-              type="text"
-              className="form-input"
-              value={content.clubhouse?.tagline || ''}
-              onChange={(e) => setContent({ ...content, clubhouse: { ...content.clubhouse, tagline: e.target.value } })}
-            />
-          </div>
-
-          <div className="form-group">
-            <label className="form-label">Clubhouse Overview Description</label>
-            <textarea
-              className="form-textarea"
-              rows={3}
-              value={content.clubhouse?.description || ''}
-              onChange={(e) => setContent({ ...content, clubhouse: { ...content.clubhouse, description: e.target.value } })}
-            />
-          </div>
-        </div>
-      )}
-
-      {/* TAB 7: CONTACT & LOCATION */}
+      {/* ========================================================= */}
+      {/* TAB 9: CONTACT, CHECK-IN & POLICIES                       */}
+      {/* ========================================================= */}
       {activeSubTab === 'contact' && (
-        <div className="table-card" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-          <h3 style={{ fontSize: '1.05rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <Phone size={18} className="text-cyan-600" />
-            <span>Sales Desk &amp; Location Information</span>
-          </h3>
-
-          <div className="form-grid-2">
-            <div className="form-group">
-              <label className="form-label">Sales Hotline Phone Number</label>
-              <input
-                type="text"
-                className="form-input"
-                value={content.contact?.phone || ''}
-                onChange={(e) => setContent({ ...content, contact: { ...content.contact, phone: e.target.value } })}
-              />
-            </div>
-
-            <div className="form-group">
-              <label className="form-label">Official WhatsApp Enquiry Number</label>
-              <input
-                type="text"
-                className="form-input"
-                value={content.contact?.whatsapp || ''}
-                onChange={(e) => setContent({ ...content, contact: { ...content.contact, whatsapp: e.target.value } })}
-              />
-            </div>
+        <div style={{ background: '#ffffff', padding: '2rem', borderRadius: '16px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          <div>
+            <h2 style={{ fontSize: '18px', fontWeight: 800, color: '#0f172a', margin: '0 0 4px' }}>
+              Contact Channels, Times &amp; Footer Info
+            </h2>
+            <p style={{ fontSize: '13.5px', color: '#64748b', margin: 0 }}>
+              Edit the official telephone number, WhatsApp contact, direct email address, check-in/out hours, and copyright statement.
+            </p>
           </div>
 
-          <div className="form-grid-2">
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.25rem' }}>
             <div className="form-group">
-              <label className="form-label">Official Contact Email (info@ambhujamaytri.in)</label>
-              <input
-                type="email"
-                className="form-input"
-                value={content.contact?.email || ''}
-                onChange={(e) => setContent({ ...content, contact: { ...content.contact, email: e.target.value } })}
-                placeholder="info@ambhujamaytri.in"
+              <label style={{ fontSize: '13px', fontWeight: 700, color: '#334155' }}>Primary Phone (Display)</label>
+              <input 
+                type="text" 
+                className="form-input" 
+                value={content.contact?.phone || ''} 
+                onChange={(e) => updateSection('contact', 'phone', e.target.value)}
+                placeholder="+27 78 972 4254"
               />
             </div>
 
             <div className="form-group">
-              <label className="form-label">Official Website URL (www.maytriambhuja.in)</label>
-              <input
-                type="text"
-                className="form-input"
-                value={content.contact?.websiteUrl || ''}
-                onChange={(e) => setContent({ ...content, contact: { ...content.contact, websiteUrl: e.target.value } })}
-                placeholder="https://www.maytriambhuja.in"
+              <label style={{ fontSize: '13px', fontWeight: 700, color: '#334155' }}>WhatsApp Link Number (Digits only)</label>
+              <input 
+                type="text" 
+                className="form-input" 
+                value={content.contact?.whatsappNumber || ''} 
+                onChange={(e) => updateSection('contact', 'whatsappNumber', e.target.value)}
+                placeholder="27789724254"
               />
             </div>
-          </div>
 
-          <div className="form-group">
-            <label className="form-label">Office &amp; Site Visiting Hours</label>
-            <input
-              type="text"
-              className="form-input"
-              value={content.contact?.officeHours || ''}
-              onChange={(e) => setContent({ ...content, contact: { ...content.contact, officeHours: e.target.value } })}
-            />
-          </div>
+            <div className="form-group">
+              <label style={{ fontSize: '13px', fontWeight: 700, color: '#334155' }}>Direct Reservations Email</label>
+              <input 
+                type="email" 
+                className="form-input" 
+                value={content.contact?.email || ''} 
+                onChange={(e) => updateSection('contact', 'email', e.target.value)}
+                placeholder="stay@edionroyal.co.za"
+              />
+            </div>
 
-          <div className="form-group">
-            <label className="form-label">Project Site Address</label>
-            <textarea
-              className="form-textarea"
-              rows={2}
-              value={content.contact?.siteAddress || ''}
-              onChange={(e) => setContent({ ...content, contact: { ...content.contact, siteAddress: e.target.value } })}
-            />
+            <div className="form-group">
+              <label style={{ fontSize: '13px', fontWeight: 700, color: '#334155' }}>Check-In Time</label>
+              <input 
+                type="text" 
+                className="form-input" 
+                value={content.contact?.checkInTime || ''} 
+                onChange={(e) => updateSection('contact', 'checkInTime', e.target.value)}
+                placeholder="From 14:00 (24h assisted)"
+              />
+            </div>
+
+            <div className="form-group">
+              <label style={{ fontSize: '13px', fontWeight: 700, color: '#334155' }}>Check-Out Time</label>
+              <input 
+                type="text" 
+                className="form-input" 
+                value={content.contact?.checkOutTime || ''} 
+                onChange={(e) => updateSection('contact', 'checkOutTime', e.target.value)}
+                placeholder="By 10:00"
+              />
+            </div>
+
+            <div className="form-group">
+              <label style={{ fontSize: '13px', fontWeight: 700, color: '#334155' }}>Official Website URL</label>
+              <input 
+                type="text" 
+                className="form-input" 
+                value={content.contact?.websiteUrl || ''} 
+                onChange={(e) => updateSection('contact', 'websiteUrl', e.target.value)}
+                placeholder="https://edionroyal.co.za"
+              />
+            </div>
+
+            <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+              <label style={{ fontSize: '13px', fontWeight: 700, color: '#334155' }}>Footer Copyright Text</label>
+              <input 
+                type="text" 
+                className="form-input" 
+                value={content.footer?.copyright || ''} 
+                onChange={(e) => updateSection('footer', 'copyright', e.target.value)}
+                placeholder="© 2026 Edion Royal Guesthouse, Milnerton, Cape Town."
+              />
+            </div>
           </div>
         </div>
       )}
 
-      {/* TAB: THEME & COLOR PALETTE STUDIO */}
+      {/* ========================================================= */}
+      {/* TAB 10: THEME & COLORS                                    */}
+      {/* ========================================================= */}
       {activeSubTab === 'theme' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          {/* Header Banner & Reset */}
-          <div className="table-card" style={{ padding: '1.5rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
-              <div>
-                <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                  <Palette size={22} className="text-cyan-600" />
-                  <span>Website Theme &amp; Color Palette Studio</span>
-                </h3>
-                <p style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '4px', maxWidth: '780px', lineHeight: 1.5 }}>
-                  Instantly customize the site colors — including the <strong>Blue accent</strong>, <strong>Black/Navy dark elements</strong>, and <strong>White backgrounds/surfaces</strong>. Select a curated luxury preset or fine-tune individual colors with the live preview below.
-                </p>
+        <div style={{ background: '#ffffff', padding: '2rem', borderRadius: '16px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          <div>
+            <h2 style={{ fontSize: '18px', fontWeight: 800, color: '#0f172a', margin: '0 0 4px' }}>
+              Website Color Palette &amp; Presets
+            </h2>
+            <p style={{ fontSize: '13.5px', color: '#64748b', margin: 0 }}>
+              Select a curated luxury hospitality theme or fine-tune individual accent, navbar, and background colors.
+            </p>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
+            {THEME_PRESETS.map(preset => (
+              <div 
+                key={preset.id}
+                onClick={() => {
+                  setContent(prev => ({
+                    ...prev,
+                    theme: { ...preset.theme }
+                  }));
+                }}
+                style={{
+                  background: '#f8fafc',
+                  border: content.theme?.presetName === preset.name ? '2px solid #2563eb' : '1px solid #e2e8f0',
+                  borderRadius: '14px',
+                  padding: '1.25rem',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                  <span style={{ fontSize: '14px', fontWeight: 800, color: '#0f172a' }}>{preset.name}</span>
+                  <span style={{ fontSize: '11px', background: '#dbeafe', color: '#1d4ed8', padding: '2px 8px', borderRadius: '4px', fontWeight: 700 }}>
+                    {preset.badge}
+                  </span>
+                </div>
+                <div style={{ display: 'flex', gap: '6px', marginBottom: '10px' }}>
+                  {preset.previewColors.map((col, ci) => (
+                    <div key={ci} style={{ width: '28px', height: '28px', borderRadius: '50%', background: col, border: '1px solid rgba(0,0,0,0.1)' }} />
+                  ))}
+                </div>
+                <p style={{ fontSize: '12px', color: '#64748b', margin: 0 }}>{preset.description}</p>
+              </div>
+            ))}
+          </div>
+
+          <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: '1.25rem' }}>
+            <h3 style={{ fontSize: '15px', fontWeight: 800, color: '#0f172a', marginBottom: '12px' }}>
+              Custom Accent Color Tuning
+            </h3>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <input 
+                  type="color" 
+                  value={content.theme?.accentColor || '#2563eb'}
+                  onChange={(e) => updateSection('theme', 'accentColor', e.target.value)}
+                  style={{ width: '42px', height: '42px', border: 'none', borderRadius: '8px', cursor: 'pointer' }}
+                />
+                <span style={{ fontSize: '13px', fontWeight: 700, color: '#334155' }}>
+                  Primary Accent ({content.theme?.accentColor || '#2563eb'})
+                </span>
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
-                <button
-                  className="btn btn-secondary btn-sm"
-                  onClick={handleResetThemeToDefault}
-                  title="Restore default brand color palette"
-                  style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}
-                >
-                  <RotateCcw size={14} />
-                  <span>Reset to Brand Defaults</span>
-                </button>
-
-                <button
-                  className="btn btn-primary btn-sm"
-                  onClick={() => saveThemeDirectly(content.theme)}
-                  disabled={isSaving}
-                  style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}
-                >
-                  {isSaving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
-                  <span>{isSaving ? 'Publishing Colors...' : 'Save & Apply to Live Site'}</span>
-                </button>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <input 
+                  type="color" 
+                  value={content.theme?.darkNavy || '#102138'}
+                  onChange={(e) => updateSection('theme', 'darkNavy', e.target.value)}
+                  style={{ width: '42px', height: '42px', border: 'none', borderRadius: '8px', cursor: 'pointer' }}
+                />
+                <span style={{ fontSize: '13px', fontWeight: 700, color: '#334155' }}>
+                  Dark Navy &amp; Headers ({content.theme?.darkNavy || '#102138'})
+                </span>
               </div>
             </div>
           </div>
+        </div>
+      )}
 
-
-
-          {/* Curated Presets */}
-          <div className="table-card" style={{ padding: '1.5rem' }}>
-            <div style={{ marginBottom: '1.25rem' }}>
-              <h4 style={{ fontSize: '0.98rem', fontWeight: 800, color: '#1e293b', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <Sparkles size={16} className="text-amber-500" />
-                <span>1-Click Curated Luxury Presets</span>
-              </h4>
-              <p style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '2px' }}>
-                Select a professionally matched designer palette to immediately transform the look of the entire website.
+      {/* ========================================================= */}
+      {/* TAB 11: MEDIA GALLERY                                     */}
+      {/* ========================================================= */}
+      {activeSubTab === 'media' && (
+        <div style={{ background: '#ffffff', padding: '2rem', borderRadius: '16px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
+            <div>
+              <h2 style={{ fontSize: '18px', fontWeight: 800, color: '#0f172a', margin: '0 0 4px' }}>
+                Media Gallery &amp; Cloud Uploads
+              </h2>
+              <p style={{ fontSize: '13.5px', color: '#64748b', margin: 0 }}>
+                Upload photos to your backend server or Cloudinary, and copy links directly into rooms or hero backgrounds.
               </p>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
-              {THEME_PRESETS.map((preset) => {
-                const isCurrentActive = 
-                  content.theme?.accentColor === preset.theme.accentColor &&
-                  content.theme?.darkPrimary === preset.theme.darkPrimary &&
-                  content.theme?.pageBg === preset.theme.pageBg;
-
-                return (
-                  <div
-                    key={preset.id}
-                    onClick={() => handleApplyThemePreset(preset)}
-                    style={{
-                      border: isCurrentActive ? '2px solid #0284c7' : '1.5px solid #e2e8f0',
-                      borderRadius: '12px',
-                      padding: '1.1rem',
-                      background: isCurrentActive ? '#f0f9ff' : '#ffffff',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s ease',
-                      boxShadow: isCurrentActive ? '0 4px 14px rgba(2, 132, 199, 0.12)' : '0 1px 4px rgba(0,0,0,0.03)',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '0.75rem'
-                    }}
-                  >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontWeight: 800, fontSize: '0.92rem', color: '#0f172a' }}>{preset.name}</span>
-                      <span style={{ 
-                        fontSize: '0.7rem', 
-                        fontWeight: 700, 
-                        padding: '3px 8px', 
-                        borderRadius: '999px',
-                        background: isCurrentActive ? '#0284c7' : '#e2e8f0',
-                        color: isCurrentActive ? '#ffffff' : '#475569'
-                      }}>
-                        {isCurrentActive ? 'Active' : preset.badge}
-                      </span>
-                    </div>
-
-                    {/* Color Swatch Bar */}
-                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                      {preset.previewColors.map((hex, idx) => (
-                        <div
-                          key={idx}
-                          style={{
-                            width: '28px',
-                            height: '28px',
-                            borderRadius: '50%',
-                            background: hex,
-                            border: '2px solid #cbd5e1',
-                            boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-                          }}
-                          title={hex}
-                        />
-                      ))}
-                      <span style={{ fontSize: '0.74rem', color: '#64748b', marginLeft: '6px' }}>
-                        Accent • Dark • Light
-                      </span>
-                    </div>
-
-                    <p style={{ fontSize: '0.78rem', color: '#64748b', lineHeight: 1.4, margin: 0 }}>
-                      {preset.description}
-                    </p>
-
-                    <button
-                      className={`btn btn-sm ${isCurrentActive ? 'btn-primary' : 'btn-secondary'}`}
-                      style={{ marginTop: 'auto', width: '100%', justifyContent: 'center' }}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleApplyThemePreset(preset);
-                      }}
-                    >
-                      {isCurrentActive ? <Check size={14} /> : <Palette size={14} />}
-                      <span>{isCurrentActive ? 'Currently Selected' : 'Apply Preset'}</span>
-                    </button>
-                  </div>
-                );
-              })}
-
-              {/* 2. Admin Created Custom Themes (WITH DELETE BUTTON) */}
-              {(content.customThemes || []).map((customPreset) => {
-                const isCurrentActive = 
-                  content.theme?.accentColor === customPreset.theme?.accentColor &&
-                  content.theme?.darkPrimary === customPreset.theme?.darkPrimary &&
-                  content.theme?.pageBg === customPreset.theme?.pageBg;
-
-                return (
-                  <div
-                    key={customPreset.id}
-                    onClick={() => handleApplyThemePreset(customPreset)}
-                    style={{
-                      border: isCurrentActive ? '2px solid #0284c7' : '1.5px solid #e2e8f0',
-                      borderRadius: '12px',
-                      padding: '1.1rem',
-                      background: isCurrentActive ? '#f0f9ff' : '#ffffff',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s ease',
-                      boxShadow: isCurrentActive ? '0 4px 14px rgba(2, 132, 199, 0.12)' : '0 1px 4px rgba(0,0,0,0.03)',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: '0.75rem'
-                    }}
-                  >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontWeight: 800, fontSize: '0.92rem', color: '#0f172a' }}>
-                        {customPreset.name}
-                      </span>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <span style={{ 
-                          fontSize: '0.7rem', 
-                          fontWeight: 700, 
-                          padding: '3px 8px', 
-                          borderRadius: '999px',
-                          background: isCurrentActive ? '#0284c7' : '#e0f2fe',
-                          color: isCurrentActive ? '#ffffff' : '#0284c7'
-                        }}>
-                          {isCurrentActive ? 'Active' : 'Custom'}
-                        </span>
-                        {/* DELETE BUTTON ON THE NEWLY CREATED CUSTOM CARD */}
-                        <button
-                          type="button"
-                          onClick={(e) => handleDeleteCustomTheme(customPreset.id, e)}
-                          style={{
-                            background: '#fee2e2',
-                            color: '#ef4444',
-                            border: '1px solid #fecaca',
-                            borderRadius: '6px',
-                            padding: '3px 6px',
-                            cursor: 'pointer',
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            transition: 'all 0.2s'
-                          }}
-                          title="Delete this custom theme"
-                        >
-                          <Trash2 size={13} />
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Color Swatch Bar */}
-                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                      {(customPreset.previewColors || [customPreset.theme?.accentColor, customPreset.theme?.darkPrimary, customPreset.theme?.pageBg]).map((hex, idx) => (
-                        <div
-                          key={idx}
-                          style={{
-                            width: '28px',
-                            height: '28px',
-                            borderRadius: '50%',
-                            background: hex,
-                            border: '2px solid #cbd5e1',
-                            boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-                          }}
-                          title={hex}
-                        />
-                      ))}
-                      <span style={{ fontSize: '0.74rem', color: '#64748b', marginLeft: '6px' }}>
-                        Accent • Dark • Light
-                      </span>
-                    </div>
-
-                    <p style={{ fontSize: '0.78rem', color: '#64748b', lineHeight: 1.4, margin: 0 }}>
-                      {customPreset.description || 'Custom 3-color palette created by admin.'}
-                    </p>
-
-                    <button
-                      className={`btn btn-sm ${isCurrentActive ? 'btn-primary' : 'btn-secondary'}`}
-                      style={{ marginTop: 'auto', width: '100%', justifyContent: 'center' }}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleApplyThemePreset(customPreset);
-                      }}
-                    >
-                      {isCurrentActive ? <Check size={14} /> : <Palette size={14} />}
-                      <span>{isCurrentActive ? 'Currently Selected' : 'Apply Preset'}</span>
-                    </button>
-                  </div>
-                );
-              })}
-
-              {/* 3. "Custom" Trigger Card (Click to open 3-color selection panel) */}
-              <div
-                onClick={handleOpenCustomModal}
-                style={{
-                  border: '2px dashed #0284c7',
-                  borderRadius: '12px',
-                  padding: '1.1rem',
-                  background: '#f8fafc',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '0.75rem',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  textAlign: 'center',
-                  minHeight: '190px'
-                }}
-              >
-                <div style={{ width: '42px', height: '42px', borderRadius: '50%', background: '#e0f2fe', color: '#0284c7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <Plus size={22} />
-                </div>
-                <div>
-                  <h4 style={{ margin: '0 0 4px 0', fontSize: '0.96rem', fontWeight: 800, color: '#0f172a' }}>
-                    Custom
-                  </h4>
-                  <p style={{ fontSize: '0.78rem', color: '#64748b', margin: 0, maxWidth: '220px' }}>
-                    Click here to choose 3 colors and create your own palette panel.
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  className="btn btn-secondary btn-sm"
-                  style={{ pointerEvents: 'none', borderColor: '#0284c7', color: '#0284c7', fontWeight: 700 }}
-                >
-                  <Plus size={14} />
-                  <span>Choose 3 Colors</span>
-                </button>
-              </div>
-            </div>
+            <button 
+              type="button" 
+              className="btn btn-primary"
+              onClick={() => triggerFileUpload('gallery')}
+              disabled={isUploading}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#2563eb', color: '#fff', border: 'none', padding: '9px 16px', borderRadius: '10px', fontWeight: 700 }}
+            >
+              {isUploading ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
+              <span>{isUploading ? 'Uploading...' : 'Upload New Photo'}</span>
+            </button>
           </div>
 
-          {/* CUSTOM 3-COLOR THEME CREATION MODAL / PANEL */}
-          {showCustomModal && (
-            <div 
-              style={{
-                position: 'fixed',
-                inset: 0,
-                background: 'rgba(15, 23, 42, 0.65)',
-                backdropFilter: 'blur(4px)',
-                zIndex: 9999,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: '1rem'
-              }}
-              onClick={() => setShowCustomModal(false)}
-            >
-              <div
-                onClick={(e) => e.stopPropagation()}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '1rem' }}>
+            {mediaList.map((media, idx) => (
+              <div 
+                key={media.key || idx}
                 style={{
-                  background: '#ffffff',
-                  borderRadius: '16px',
-                  maxWidth: '520px',
-                  width: '100%',
-                  boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+                  background: '#f8fafc',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '12px',
                   overflow: 'hidden',
                   display: 'flex',
                   flexDirection: 'column'
                 }}
               >
-                {/* Modal Header */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.25rem 1.5rem', borderBottom: '1px solid #e2e8f0', background: '#f8fafc' }}>
-                  <div>
-                    <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      <Palette size={18} className="text-cyan-600" />
-                      <span>Create Custom 3-Color Theme</span>
-                    </h3>
-                    <p style={{ margin: '2px 0 0 0', fontSize: '0.8rem', color: '#64748b' }}>
-                      Pick 3 colors to generate a new theme panel with delete controls.
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setShowCustomModal(false)}
-                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', padding: '4px' }}
-                  >
-                    <X size={20} />
-                  </button>
+                <div style={{ height: '140px', background: '#000', position: 'relative' }}>
+                  <img 
+                    src={media.url} 
+                    alt={media.name}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  />
+                  <span style={{
+                    position: 'absolute',
+                    top: '8px',
+                    left: '8px',
+                    background: 'rgba(0,0,0,0.6)',
+                    color: '#fff',
+                    padding: '2px 8px',
+                    borderRadius: '4px',
+                    fontSize: '10.5px',
+                    fontWeight: 700
+                  }}>
+                    {media.category || 'image'}
+                  </span>
                 </div>
 
-                {/* Modal Body */}
-                <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-                  {/* Theme Name */}
-                  <div className="form-group" style={{ margin: 0 }}>
-                    <label className="form-label" style={{ fontWeight: 700, fontSize: '0.85rem' }}>Theme Palette Name</label>
-                    <input
-                      type="text"
-                      className="form-input"
-                      value={modalThemeName}
-                      onChange={(e) => setModalThemeName(e.target.value)}
-                      placeholder="e.g. Royal Sunset, Modern Luxury"
-                    />
+                <div style={{ padding: '10px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <span style={{ fontSize: '12.5px', fontWeight: 700, color: '#0f172a', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {media.name}
+                  </span>
+                  <div style={{ display: 'flex', gap: '6px' }}>
+                    <button
+                      type="button"
+                      className="btn btn-secondary btn-sm"
+                      onClick={() => {
+                        navigator.clipboard.writeText(media.url);
+                        alert('Image URL copied to clipboard: ' + media.url);
+                      }}
+                      style={{ fontSize: '11px', flex: 1, padding: '4px' }}
+                    >
+                      Copy URL
+                    </button>
+                    {media.key && !media.key.startsWith('room-') && (
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          if (window.confirm('Remove this photo?')) {
+                            await deleteMediaFromAPI(media.key);
+                            setMediaList(prev => prev.filter(m => m.key !== media.key));
+                          }
+                        }}
+                        style={{ background: '#fef2f2', border: '1px solid #fee2e2', color: '#ef4444', borderRadius: '6px', padding: '4px 8px', cursor: 'pointer' }}
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    )}
                   </div>
-
-                  {/* 3 Colors Inputs */}
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.9rem' }}>
-                    {/* Color 1: Accent */}
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#f8fafc', padding: '0.75rem 1rem', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
-                      <div>
-                        <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0f172a' }}>1. Accent Color</span>
-                        <p style={{ fontSize: '0.75rem', color: '#64748b', margin: 0 }}>CTA buttons, badges, glowing highlights</p>
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <input
-                          type="color"
-                          value={modalColors.accent}
-                          onChange={(e) => setModalColors(prev => ({ ...prev, accent: e.target.value }))}
-                          style={{ width: '40px', height: '36px', border: '1.5px solid #cbd5e1', borderRadius: '6px', cursor: 'pointer', padding: '2px', background: 'transparent' }}
-                        />
-                        <input
-                          type="text"
-                          value={modalColors.accent}
-                          onChange={(e) => setModalColors(prev => ({ ...prev, accent: e.target.value }))}
-                          style={{ width: '85px', fontFamily: 'monospace', fontWeight: 700, fontSize: '0.85rem' }}
-                          className="form-input"
-                        />
-                      </div>
-                    </div>
-
-                    {/* Color 2: Dark Elements */}
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#f8fafc', padding: '0.75rem 1rem', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
-                      <div>
-                        <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0f172a' }}>2. Midnight / Dark Elements</span>
-                        <p style={{ fontSize: '0.75rem', color: '#64748b', margin: 0 }}>Navbar header, dark cards, footer</p>
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <input
-                          type="color"
-                          value={modalColors.dark}
-                          onChange={(e) => setModalColors(prev => ({ ...prev, dark: e.target.value }))}
-                          style={{ width: '40px', height: '36px', border: '1.5px solid #cbd5e1', borderRadius: '6px', cursor: 'pointer', padding: '2px', background: 'transparent' }}
-                        />
-                        <input
-                          type="text"
-                          value={modalColors.dark}
-                          onChange={(e) => setModalColors(prev => ({ ...prev, dark: e.target.value }))}
-                          style={{ width: '85px', fontFamily: 'monospace', fontWeight: 700, fontSize: '0.85rem' }}
-                          className="form-input"
-                        />
-                      </div>
-                    </div>
-
-                    {/* Color 3: Background / Light */}
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#f8fafc', padding: '0.75rem 1rem', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
-                      <div>
-                        <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0f172a' }}>3. Page Background / Light</span>
-                        <p style={{ fontSize: '0.75rem', color: '#64748b', margin: 0 }}>Page body canvas &amp; surface backgrounds</p>
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <input
-                          type="color"
-                          value={modalColors.bg}
-                          onChange={(e) => setModalColors(prev => ({ ...prev, bg: e.target.value }))}
-                          style={{ width: '40px', height: '36px', border: '1.5px solid #cbd5e1', borderRadius: '6px', cursor: 'pointer', padding: '2px', background: 'transparent' }}
-                        />
-                        <input
-                          type="text"
-                          value={modalColors.bg}
-                          onChange={(e) => setModalColors(prev => ({ ...prev, bg: e.target.value }))}
-                          style={{ width: '85px', fontFamily: 'monospace', fontWeight: 700, fontSize: '0.85rem' }}
-                          className="form-input"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Palette Preview Bar */}
-                  <div style={{ padding: '0.75rem 1rem', background: modalColors.bg, border: '1px solid #cbd5e1', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <span style={{ fontSize: '0.78rem', fontWeight: 700, color: modalColors.dark }}>
-                      Preview:
-                    </span>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span style={{ background: modalColors.dark, color: '#fff', padding: '3px 8px', borderRadius: '4px', fontSize: '0.72rem', fontWeight: 700 }}>
-                        Navbar
-                      </span>
-                      <span style={{ background: modalColors.accent, color: '#fff', padding: '3px 10px', borderRadius: '4px', fontSize: '0.72rem', fontWeight: 700 }}>
-                        Button
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Modal Footer */}
-                <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '0.75rem', padding: '1rem 1.5rem', borderTop: '1px solid #e2e8f0', background: '#f8fafc' }}>
-                  <button
-                    type="button"
-                    className="btn btn-secondary"
-                    onClick={() => setShowCustomModal(false)}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="button"
-                    className="btn btn-primary"
-                    onClick={handleCreateCustomTheme}
-                    disabled={isSaving}
-                    style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}
-                  >
-                    {isSaving ? <Loader2 size={15} className="animate-spin" /> : <Sparkles size={15} />}
-                    <span>Create &amp; Apply Theme</span>
-                  </button>
                 </div>
               </div>
-            </div>
-          )}
+            ))}
+          </div>
         </div>
       )}
     </div>

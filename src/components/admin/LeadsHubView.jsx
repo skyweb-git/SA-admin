@@ -29,19 +29,8 @@ export default function LeadsHubView({
   return (
     <div className="flex flex-col gap-6">
       {/* Sub-Tabs Switcher for Leads & Activities */}
-      <div 
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          background: '#ffffff',
-          padding: '0.65rem 1.25rem',
-          borderRadius: 'var(--radius-lg)',
-          border: '1.5px solid var(--border-subtle)',
-          boxShadow: '0 2px 6px rgba(0,0,0,0.03)'
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+      <div className="subnav-bar">
+        <div className="subnav-buttons">
           <button
             className={`btn ${subTab === 'leads' ? 'btn-primary' : 'btn-secondary'} btn-sm`}
             onClick={() => setSubTab('leads')}
@@ -70,7 +59,7 @@ export default function LeadsHubView({
           </button>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <div className="subnav-stats">
           <span className="badge badge-cyan" style={{ fontSize: '0.78rem' }}>
             {subTab === 'leads' ? 'Pipeline Master' : subTab === 'calls' ? 'Telecaller Audio Logs' : 'Email Outreach History'}
           </span>

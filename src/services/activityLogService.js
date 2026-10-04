@@ -1,70 +1,25 @@
 // Activity Log Service (Calls Completed & Emails Dispatched by Employees)
 
-const CALL_LOGS_KEY = 'maytri_call_logs_v1';
-const EMAIL_LOGS_KEY = 'maytri_email_logs_v1';
-const CHANNEL_NAME = 'maytri_leads_sync_channel';
+const CALL_LOGS_KEY = 'edion_royal_call_logs_v1';
+const EMAIL_LOGS_KEY = 'edion_royal_email_logs_v1';
+const CHANNEL_NAME = 'edion_royal_leads_sync_channel';
 
-const INITIAL_CALL_LOGS = [];
-const INITIAL_EMAIL_LOGS = [];
+export const INITIAL_CALL_LOGS = [];
+export const INITIAL_EMAIL_LOGS = [];
 
-export const EMAIL_TEMPLATES = [
-  {
-    id: 'tpl-brochure',
-    title: 'Digital Project Kit & Master Plan',
-    subject: (name) => `Maytri Ambhuja Villa Township: Comprehensive Digital Kit for ${name || 'You'}`,
-    body: (name, unit) => `Dear ${name || 'Sir/Madam'},
+const MOCK_NAMES = new Set([
+  'Thabo Ndlovu', 'Sarah Jenkins', 'Dr. Aisha Patel', 'Liam & Chloe Van Der Merwe',
+  'Markus Weber', 'Francois Du Plessis', 'Elena Rostova', 'Kagiso Molefe',
+  'Johan & Ansie Botha', 'Nomvula Sithole', 'David Campbell', 'Pieter Van Zyl',
+  'Marlene & Jacques De Kock', 'Anil & Priya Sharma', 'Alexander Wright', 'Test Guest'
+]);
 
-Thank you for your interest in Maytri Ambhuja, Hyderabad's premier luxury villa community near ORR Exit 12, Shamshabad.
-
-We are pleased to share the complete project digital kit:
-• Township Master Plan (4.5 Acres Central Park)
-• 90,000 Sq.Ft Luxury Clubhouse & 16 Amenities
-• Architectural Floor Plans for 222 SQ YD & 300 SQ YD East/West Facing Villas (${unit || 'Luxury Villas'})
-• Official Telangana RERA Registration: P02400007647
-
-Please let us know your preferred date and time for an exclusive guided walkthrough.
-
-Warm regards,
-Sales & Advisory Desk
-Maytri Ambhuja Township
-Phone: +91 98490 12345 | Web: www.ambhujamaytri.in`
-  },
-  {
-    id: 'tpl-cost-sheet',
-    title: 'Cost Sheet & Payment Milestone Plan',
-    subject: (name) => `Official Pricing & Payment Schedule — Maytri Ambhuja`,
-    body: (name, unit) => `Dear ${name || 'Valued Client'},
-
-As requested during our discussion, here is the detailed pricing overview and payment milestone schedule for ${unit || 'Maytri Ambhuja Luxury Villas'}:
-
-• All-inclusive pricing breakdown with base rate and clubhouse charges
-• Construction linked payment milestones (10% booking advance, phased structure payments)
-• Approved Home Loan Partners: SBI, HDFC Bank, ICICI Bank & Axis Bank
-
-Our finance advisory team is available to assist you with custom payment schedules and loan pre-approvals.
-
-Warm regards,
-Maytri Ambhuja Sales Office`
-  },
-  {
-    id: 'tpl-site-visit',
-    title: 'VIP Site Visit Confirmation & Google Maps Pass',
-    subject: (name) => `Confirmation: Your VIP Site Visit at Maytri Ambhuja`,
-    body: (name, unit) => `Dear ${name || 'Sir/Madam'},
-
-We are delighted to confirm your upcoming site visit to Maytri Ambhuja Villa Township!
-
-📍 Site Location: Maytri Ambhuja, Near ORR Exit 12, Shamshabad - Sanghi Nagar Road, Hyderabad, Telangana 501511.
-Google Maps Link: https://maps.google.com/?q=Maytri+Ambhuja+Hyderabad
-
-Your dedicated relationship manager will receive you at the township experience center to give you and your family a personalized tour of the sample villa and clubhouse.
-
-Looking forward to meeting you!
-
-Warm regards,
-Maytri Ambhuja Welcome Desk`
-  }
-];
+function isMockActivity(item) {
+  if (!item) return false;
+  if (typeof item.id === 'string' && (/^call-0[1-9]|^call-1[0-4]$/.test(item.id) || /^mail-0[1-9]|^mail-1[0-4]$/.test(item.id))) return true;
+  if (MOCK_NAMES.has(item.leadName) || MOCK_NAMES.has(item.recipientName)) return true;
+  return false;
+}
 
 let broadcastChannel = null;
 try {
@@ -80,15 +35,86 @@ export function getCallLogs() {
   if (typeof window === 'undefined') return [];
   try {
     const raw = localStorage.getItem(CALL_LOGS_KEY);
-    if (!raw) {
-      return [];
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed)) {
+      const clean = parsed.filter(c => !isMockActivity(c));
+      if (clean.length !== parsed.length) {
+        localStorage.setItem(CALL_LOGS_KEY, JSON.stringify(clean));
+      }
+      return clean;
     }
-    return JSON.parse(raw);
+    return [];
   } catch (e) {
     console.error('Failed to get call logs', e);
     return [];
   }
 }
+
+export const EMAIL_TEMPLATES = [
+  {
+    id: 'tpl-brochure',
+    title: 'Room Rates & Digital Brochure',
+    subject: (name) => `Edion Royal Guesthouse: Room Options & Direct Rates for ${name || 'Your Stay'}`,
+    body: (name, unit) => `Dear ${name || 'Valued Guest'},
+
+Thank you for your interest in Edion Royal Guesthouse in Milnerton, Cape Town.
+
+We are pleased to share our room options and direct rates:
+• Renovated Double Rooms & En-Suite Accommodations (${unit || 'Selected Room'})
+• Twin Rooms with Self-Catering Kitchenette
+• Spacious Triple & Family Rooms
+• Standard Inclusions: Uncapped high-speed WiFi, flat-screen TV, private bathroom, secure gated parking, 24-hour reception, and braai/patio access.
+
+Please let us know your preferred check-in and check-out dates and we will gladly lock in your booking with zero reservation fees.
+
+Warm regards,
+Reservations Team
+Edion Royal Guesthouse
+7 Arum Street, Milnerton, Cape Town, 7441
+Phone / WhatsApp: +27 78 972 4254 | Email: stay@edionroyal.co.za`
+  },
+  {
+    id: 'tpl-cost-sheet',
+    title: 'Booking Confirmation & Rates',
+    subject: (name) => `Reservation Confirmation & Rate Breakdown — Edion Royal Guesthouse`,
+    body: (name, unit) => `Dear ${name || 'Valued Guest'},
+
+Here is the detailed direct rate overview and stay confirmation for ${unit || 'your stay at Edion Royal Guesthouse'}:
+
+• Room Type: ${unit || 'Standard En-Suite Room'}
+• Guaranteed Direct Rate with no OTA commissions or hidden fees
+• Check-in from 14:00 (24h assisted arrival) | Check-out by 10:00
+• Complimentary amenities: High-speed WiFi, gated parking, shared kitchen and barbecue area
+
+Please reply with your confirmation or payment preference to secure your dates.
+
+Warm regards,
+Front Desk & Reservations
+Edion Royal Guesthouse`
+  },
+  {
+    id: 'tpl-site-visit',
+    title: 'Arrival Directions & Check-In Pass',
+    subject: (name) => `Check-in Directions & Arrival Pass: Edion Royal Guesthouse`,
+    body: (name, unit) => `Dear ${name || 'Valued Guest'},
+
+We look forward to welcoming you to Edion Royal Guesthouse!
+
+📍 Address: 7 Arum Street, Milnerton, Cape Town, 7441 (off the R27)
+Google Maps Link: https://maps.google.com/?q=7+Arum+Street,+Milnerton,+Cape+Town,+7441
+
+Key Details for Arrival:
+• Reception is open 24 hours to welcome you.
+• Secure, remote-gated parking is available on-site.
+• Located just 3 minutes from Milnerton Beach and 15 minutes from Cape Town CBD.
+
+If you require an airport transfer or late check-in assistance, please call or WhatsApp us at +27 78 972 4254.
+
+Safe travels,
+Edion Royal Guesthouse Team`
+  }
+];
 
 export function logCall(callData) {
   const current = getCallLogs();
@@ -125,10 +151,16 @@ export function getEmailLogs() {
   if (typeof window === 'undefined') return [];
   try {
     const raw = localStorage.getItem(EMAIL_LOGS_KEY);
-    if (!raw) {
-      return [];
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed)) {
+      const clean = parsed.filter(m => !isMockActivity(m));
+      if (clean.length !== parsed.length) {
+        localStorage.setItem(EMAIL_LOGS_KEY, JSON.stringify(clean));
+      }
+      return clean;
     }
-    return JSON.parse(raw);
+    return [];
   } catch (e) {
     console.error('Failed to get email logs', e);
     return [];
@@ -144,8 +176,8 @@ export function logEmail(emailData) {
     leadEmail: emailData.leadEmail || '',
     employeeId: emailData.employeeId || 'emp-unknown',
     employeeName: emailData.employeeName || 'Marketing Executive',
-    templateType: emailData.templateType || 'Digital Project Kit & Master Plan',
-    subject: emailData.subject || 'Maytri Ambhuja Villa Township Enquiry',
+    templateType: emailData.templateType || 'Room Rates & Digital Brochure',
+    subject: emailData.subject || 'Edion Royal Guesthouse Reservation Enquiry',
     preview: emailData.preview || (emailData.body ? emailData.body.substring(0, 120) + '...' : ''),
     body: emailData.body || '',
     status: 'Delivered',
@@ -174,8 +206,9 @@ export async function fetchCallLogsFromAPI() {
     if (!res.ok) throw new Error('API fetch calls failed');
     const json = await res.json();
     if (json.success && Array.isArray(json.data)) {
-      localStorage.setItem(CALL_LOGS_KEY, JSON.stringify(json.data));
-      return json.data;
+      const clean = json.data.filter(c => !isMockActivity(c));
+      localStorage.setItem(CALL_LOGS_KEY, JSON.stringify(clean));
+      return clean;
     }
   } catch (err) {
     console.warn('Could not sync call logs from API:', err.message);
@@ -203,8 +236,9 @@ export async function fetchEmailLogsFromAPI() {
     if (!res.ok) throw new Error('API fetch emails failed');
     const json = await res.json();
     if (json.success && Array.isArray(json.data)) {
-      localStorage.setItem(EMAIL_LOGS_KEY, JSON.stringify(json.data));
-      return json.data;
+      const clean = json.data.filter(m => !isMockActivity(m));
+      localStorage.setItem(EMAIL_LOGS_KEY, JSON.stringify(clean));
+      return clean;
     }
   } catch (err) {
     console.warn('Could not sync email logs from API:', err.message);

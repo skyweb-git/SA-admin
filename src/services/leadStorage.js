@@ -1,12 +1,27 @@
 // Lead Storage Service with localStorage, Employee Assignment and BroadcastChannel Sync
+// Tailored for Edion Royal Guesthouse Reservations & Inquiries Hub
 
-const STORAGE_KEY = 'maytri_realestate_leads_db_v1';
-const CHANNEL_NAME = 'maytri_leads_sync_channel';
+const STORAGE_KEY = 'edion_royal_leads_db_v1';
+const CHANNEL_NAME = 'edion_royal_leads_sync_channel';
 
 import { getApiBaseUrl, API_BASE_URL } from './apiConfig';
 export { getApiBaseUrl, API_BASE_URL };
 
-const INITIAL_SAMPLE_LEADS = [];
+export const INITIAL_SAMPLE_LEADS = [];
+
+const MOCK_NAMES = new Set([
+  'Thabo Ndlovu', 'Sarah Jenkins', 'Dr. Aisha Patel', 'Liam & Chloe Van Der Merwe',
+  'Markus Weber', 'Francois Du Plessis', 'Elena Rostova', 'Kagiso Molefe',
+  'Johan & Ansie Botha', 'Nomvula Sithole', 'David Campbell', 'Pieter Van Zyl',
+  'Marlene & Jacques De Kock', 'Anil & Priya Sharma', 'Alexander Wright', 'Test Guest'
+]);
+
+function isMockLead(l) {
+  if (!l) return false;
+  if (typeof l.id === 'string' && /^lead-0[1-9]|^lead-1[0-4]$/.test(l.id)) return true;
+  if (MOCK_NAMES.has(l.fullName) || MOCK_NAMES.has(l.name)) return true;
+  return false;
+}
 
 let broadcastChannel = null;
 try {
@@ -24,7 +39,15 @@ export function getLeads() {
     if (!raw) {
       return [];
     }
-    return JSON.parse(raw);
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed)) {
+      const clean = parsed.filter(l => !isMockLead(l));
+      if (clean.length !== parsed.length) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(clean));
+      }
+      return clean;
+    }
+    return [];
   } catch (e) {
     console.error('Failed to load leads from localStorage', e);
     return [];
@@ -38,15 +61,17 @@ export async function saveLead(leadInput) {
 
   const newLead = {
     id: leadInput.id || ('lead-' + Date.now().toString(36) + Math.random().toString(36).substring(2, 6)),
-    fullName: leadInput.fullName || 'Anonymous Prospect',
+    fullName: leadInput.fullName || leadInput.name || 'Anonymous Guest',
     phone: leadInput.phone || '',
     email: leadInput.email || '',
     preferredMethod: leadInput.preferredMethod || 'Phone',
     source: leadInput.source || 'Admin Manual Entry',
     message: leadInput.message || '',
     status: leadInput.status || 'New',
-    unitInterest: leadInput.unitInterest || 'Villa Enquiry',
-    budget: leadInput.budget || '₹3.8 Cr - ₹5.5 Cr',
+    unitInterest: leadInput.unitInterest || leadInput.room || 'Any Room / Best Available',
+    checkIn: leadInput.checkIn || '',
+    checkOut: leadInput.checkOut || '',
+    budget: leadInput.budget || '',
     assignedToId: assignedId,
     assignedToName: assignedName,
     assignedTo: assignedId,
@@ -56,7 +81,7 @@ export async function saveLead(leadInput) {
     followUpDate: leadInput.followUpDate || new Date().toISOString().split('T')[0],
   };
 
-  const updatedLeads = [newLead, ...currentLeads];
+  const updatedLeads = [newLead, ...currentLeads.filter(l => l.id !== newLead.id)];
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedLeads));
     if (broadcastChannel) {
@@ -66,7 +91,7 @@ export async function saveLead(leadInput) {
     console.error('Error saving lead to storage', e);
   }
 
-  // Sync with MongoDB API and wait for result
+  // Sync with MongoDB API
   try {
     await syncLeadToAPI(newLead);
   } catch (err) {
@@ -94,7 +119,7 @@ export async function updateLead(leadId, updates) {
   }
 
   const updatedLeads = currentLeads.map(lead => {
-    if (lead.id === leadId) {
+    if (lead.id === leadId || lead._id === leadId) {
       return { ...lead, ...normalizedUpdates, updatedAt: new Date().toISOString() };
     }
     return lead;
@@ -109,7 +134,7 @@ export async function updateLead(leadId, updates) {
     console.error('Error updating lead in storage', e);
   }
 
-  // Sync update with MongoDB API and wait for completion to avoid race conditions
+  // Sync update with MongoDB API
   try {
     await updateLeadOnAPI(leadId, normalizedUpdates);
   } catch (err) {
@@ -131,7 +156,7 @@ export async function assignLeadToEmployee(leadId, employeeId, employeeName) {
 
 export async function deleteLead(leadId) {
   const currentLeads = getLeads();
-  const updatedLeads = currentLeads.filter(lead => lead.id !== leadId);
+  const updatedLeads = currentLeads.filter(lead => lead.id !== leadId && lead._id !== leadId);
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedLeads));
     if (broadcastChannel) {
@@ -189,9 +214,9 @@ export function subscribeToLeads(callback) {
 
 export function exportLeadsToCSV(leads) {
   if (!leads || !leads.length) return;
-  const headers = ['Lead ID', 'Full Name', 'Phone', 'Email', 'Assigned Specialist', 'Preferred Contact', 'Status', 'Unit Interest', 'Source', 'Submission Date', 'Follow Up', 'Message', 'Notes'];
+  const headers = ['Reservation ID', 'Guest Name', 'Phone', 'Email', 'Assigned Staff', 'Preferred Contact', 'Status', 'Room Selected', 'Check-In', 'Check-Out', 'Source', 'Date Created', 'Message', 'Notes'];
   const rows = leads.map(l => [
-    `"${l.id}"`,
+    `"${l.id || l._id || ''}"`,
     `"${(l.fullName || '').replace(/"/g, '""')}"`,
     `"${(l.phone || '').replace(/"/g, '""')}"`,
     `"${(l.email || '').replace(/"/g, '""')}"`,
@@ -199,9 +224,10 @@ export function exportLeadsToCSV(leads) {
     `"${(l.preferredMethod || '').replace(/"/g, '""')}"`,
     `"${(l.status || '').replace(/"/g, '""')}"`,
     `"${(l.unitInterest || '').replace(/"/g, '""')}"`,
+    `"${(l.checkIn || '').replace(/"/g, '""')}"`,
+    `"${(l.checkOut || '').replace(/"/g, '""')}"`,
     `"${(l.source || '').replace(/"/g, '""')}"`,
-    `"${new Date(l.createdAt).toLocaleString()}"`,
-    `"${l.followUpDate || ''}"`,
+    `"${new Date(l.createdAt || Date.now()).toLocaleString()}"`,
     `"${(l.message || '').replace(/"/g, '""')}"`,
     `"${(l.notes || '').replace(/"/g, '""')}"`
   ]);
@@ -211,7 +237,7 @@ export function exportLeadsToCSV(leads) {
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.setAttribute('href', url);
-  link.setAttribute('download', `maytri_leads_export_${new Date().toISOString().split('T')[0]}.csv`);
+  link.setAttribute('download', `edion_royal_reservations_${new Date().toISOString().split('T')[0]}.csv`);
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
@@ -225,19 +251,39 @@ export async function fetchLeadsFromAPI() {
     if (!res.ok) throw new Error('API fetch failed');
     const json = await res.json();
     if (json.success && Array.isArray(json.data)) {
-      const normalized = json.data.map(l => {
+      const cleanData = json.data.filter(l => !isMockLead(l));
+      const normalized = cleanData.map(l => {
         const assignedId = l.assignedToId || l.assignedTo || '';
-        const assignedName = l.assignedToName || l.assignedEmployeeName || (assignedId ? 'Assigned' : 'Unassigned');
+        const assignedName = l.assignedToName || l.assignedEmployeeName || (assignedId === 'emp-02' ? 'Front Desk Manager' : assignedId ? 'Assigned' : 'Unassigned');
         return {
           ...l,
+          id: l.id || l._id,
           assignedToId: assignedId,
           assignedToName: assignedName,
           assignedTo: assignedId,
           assignedEmployeeName: assignedName
         };
       });
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(normalized));
-      return normalized;
+
+      // Safely merge with any recent locally-submitted leads not yet returned by API
+      let finalLeads = normalized;
+      try {
+        const localRaw = localStorage.getItem(STORAGE_KEY);
+        if (localRaw) {
+          const localParsed = JSON.parse(localRaw);
+          if (Array.isArray(localParsed)) {
+            const cleanLocal = localParsed.filter(l => !isMockLead(l));
+            const apiIds = new Set(normalized.map(l => l.id || l._id));
+            const localOnly = cleanLocal.filter(l => l.id && !apiIds.has(l.id) && !apiIds.has(l._id));
+            if (localOnly.length > 0) {
+              finalLeads = [...localOnly, ...normalized];
+            }
+          }
+        }
+      } catch (mergeErr) {}
+
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(finalLeads));
+      return finalLeads;
     }
   } catch (err) {
     console.warn('Could not sync leads from MongoDB API, using local storage:', err.message);

@@ -27,19 +27,9 @@ export default function DashboardView({
   return (
     <div className="flex flex-col gap-6">
       {/* Sub-Navigation Switcher */}
-      <div 
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          background: '#ffffff',
-          padding: '0.65rem 1.25rem',
-          borderRadius: 'var(--radius-lg)',
-          border: '1.5px solid var(--border-subtle)',
-          boxShadow: '0 2px 6px rgba(0,0,0,0.03)'
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+      {/* Sub-Navigation Switcher */}
+      <div className="subnav-bar">
+        <div className="subnav-buttons">
           <button
             className={`btn ${subTab === 'overview' ? 'btn-primary' : 'btn-secondary'} btn-sm`}
             onClick={() => setSubTab('overview')}
@@ -59,7 +49,7 @@ export default function DashboardView({
           </button>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.82rem', color: '#475569', fontWeight: 600 }}>
+        <div className="subnav-stats">
           <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
             <strong style={{ color: '#0f172a' }}>{leads.length}</strong> Leads
           </span>

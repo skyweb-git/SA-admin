@@ -27,11 +27,26 @@ export default function EmployeeDashboard({
   const [activeEmailLead, setActiveEmailLead] = useState(null);
   const [selectedDrawerLead, setSelectedDrawerLead] = useState(null);
 
-  // My stats
-  const myCalls = callLogs.filter(c => c.employeeId === currentUser.id);
-  const myEmails = emailLogs.filter(m => m.employeeId === currentUser.id);
-  const myLeads = leads.filter(l => l.assignedToId === currentUser.id);
-  const mySiteVisits = myLeads.filter(l => l.status === 'Site Visit Scheduled');
+  const isMine = (item) => {
+    if (!item || !currentUser) return false;
+    const empId = currentUser.id || currentUser._id;
+    return (
+      (empId && (item.employeeId === empId || item.assignedToId === empId || item.assignedTo === empId)) ||
+      (currentUser.name && (item.employeeName === currentUser.name || item.assignedToName === currentUser.name || item.assignedEmployeeName === currentUser.name)) ||
+      (currentUser.email && (item.employeeEmail === currentUser.email || item.assignedToEmail === currentUser.email)) ||
+      (!item.assignedToId && !item.assignedTo && (empId === 'emp-02' || (currentUser.name && currentUser.name.toLowerCase().includes('front desk'))))
+    );
+  };
+
+  const myCalls = callLogs.filter(isMine);
+  const myEmails = emailLogs.filter(isMine);
+  const myLeads = leads.filter(isMine);
+  const mySiteVisits = myLeads.filter(l => 
+    l.status === 'Site Visit Scheduled' || 
+    l.status === 'Viewing Scheduled' || 
+    l.status === 'Confirmed' ||
+    l.status === 'Check-in Scheduled'
+  );
 
   const callTarget = currentUser.dailyCallTarget || 30;
   const emailTarget = currentUser.dailyEmailTarget || 20;
@@ -146,7 +161,7 @@ export default function EmployeeDashboard({
             <span className="stat-label">Site Visits Scheduled</span>
             <span className="stat-value">{mySiteVisits.length}</span>
             <span className="stat-trend positive">
-              <span>Township Walkthroughs</span>
+              <span>Room Viewings & Check-ins</span>
             </span>
           </div>
         </div>
