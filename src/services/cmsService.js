@@ -27,9 +27,9 @@ export const DEFAULT_CONTENT = {
     addressTitle: '7 Arum Street',
     addressSubtitle: 'Milnerton, Cape Town',
     bgImages: {
-      custom: '/798129955.jpg',
-      estate: '/513927625.jpg',
-      surreal: '/798153808.jpg'
+      custom: 'https://res.cloudinary.com/ps3hwvnw/image/upload/v1793096036/edion_royal_guesthouse/backgrounds/hero_custom_798129955.jpg',
+      estate: 'https://res.cloudinary.com/ps3hwvnw/image/upload/v1793096037/edion_royal_guesthouse/backgrounds/hero_estate_513927625.jpg',
+      surreal: 'https://res.cloudinary.com/ps3hwvnw/image/upload/v1793096038/edion_royal_guesthouse/backgrounds/hero_surreal_798153808.jpg'
     }
   },
   stats: {
@@ -69,7 +69,7 @@ export const DEFAULT_CONTENT = {
         pricePerNight: 850,
         maxGuests: 2,
         features: ['Private bathroom', 'Work desk', 'Flat-screen TV', 'Wardrobe'],
-        imageUrl: 'https://images.unsplash.com/photo-1590490360182-c33d57733427?q=80&w=1200&auto=format&fit=crop'
+        imageUrl: 'https://res.cloudinary.com/ps3hwvnw/image/upload/v1793096030/edion_royal_guesthouse/rooms/room_renovated_double.jpg'
       },
       {
         id: 'twin-kitchenette',
@@ -79,7 +79,7 @@ export const DEFAULT_CONTENT = {
         pricePerNight: 950,
         maxGuests: 2,
         features: ['Fridge & microwave', 'Kitchenware', 'Private bathroom', 'Free WiFi'],
-        imageUrl: 'https://images.unsplash.com/photo-1566665797739-1674de7a421a?q=80&w=1200&auto=format&fit=crop'
+        imageUrl: 'https://res.cloudinary.com/ps3hwvnw/image/upload/v1793096031/edion_royal_guesthouse/rooms/room_twin_kitchenette.jpg'
       },
       {
         id: 'triple-room',
@@ -89,7 +89,7 @@ export const DEFAULT_CONTENT = {
         pricePerNight: 1100,
         maxGuests: 3,
         features: ['Private bathroom', 'Flat-screen TV', 'Free WiFi', 'Flexible cancellation'],
-        imageUrl: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=1200&auto=format&fit=crop'
+        imageUrl: 'https://res.cloudinary.com/ps3hwvnw/image/upload/v1793096032/edion_royal_guesthouse/rooms/room_triple.jpg'
       },
       {
         id: 'budget-double',
@@ -99,7 +99,7 @@ export const DEFAULT_CONTENT = {
         pricePerNight: 750,
         maxGuests: 2,
         features: ['Private bathroom', 'Flat-screen TV', 'Free WiFi', 'Budget-friendly'],
-        imageUrl: 'https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?q=80&w=1200&auto=format&fit=crop'
+        imageUrl: 'https://res.cloudinary.com/ps3hwvnw/image/upload/v1793096033/edion_royal_guesthouse/rooms/room_budget_double.jpg'
       },
       {
         id: 'comfort-triple-shower',
@@ -109,7 +109,7 @@ export const DEFAULT_CONTENT = {
         pricePerNight: 1150,
         maxGuests: 3,
         features: ['Private bathroom', 'Shower', 'Flat-screen TV', 'Free WiFi'],
-        imageUrl: 'https://images.unsplash.com/photo-1598928506311-c55ded91a20c?q=80&w=1200&auto=format&fit=crop'
+        imageUrl: 'https://res.cloudinary.com/ps3hwvnw/image/upload/v1793096033/edion_royal_guesthouse/rooms/room_comfort_triple_shower.jpg'
       },
       {
         id: 'budget-triple',
@@ -119,7 +119,7 @@ export const DEFAULT_CONTENT = {
         pricePerNight: 1050,
         maxGuests: 3,
         features: ['Private bathroom', 'Flat-screen TV', 'Free WiFi', 'Extra-large bed'],
-        imageUrl: 'https://images.unsplash.com/photo-1618773928121-c32242e63f39?q=80&w=1200&auto=format&fit=crop'
+        imageUrl: 'https://res.cloudinary.com/ps3hwvnw/image/upload/v1793096034/edion_royal_guesthouse/rooms/room_budget_triple.jpg'
       },
       {
         id: 'family-room',
@@ -129,7 +129,7 @@ export const DEFAULT_CONTENT = {
         pricePerNight: 1350,
         maxGuests: 4,
         features: ['Private bathroom', 'Flat-screen TV', 'Free WiFi', 'Family layout'],
-        imageUrl: 'https://images.unsplash.com/photo-1578683010236-d716f9a3f461?q=80&w=1200&auto=format&fit=crop'
+        imageUrl: 'https://res.cloudinary.com/ps3hwvnw/image/upload/v1793096035/edion_royal_guesthouse/rooms/room_family.jpg'
       }
     ]
   },

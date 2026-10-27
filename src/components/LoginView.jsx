@@ -37,8 +37,8 @@ export default function LoginView({ onLoginSuccess, employees = [] }) {
   const [emailChangeStep, setEmailChangeStep] = useState(1); // 1 = Request OTP, 2 = Verify OTP & Update Email
   const [isOtpMode, setIsOtpMode] = useState(false);
   
-  // Admin Login States (default edionroyal@gmail.com)
-  const [adminEmail, setAdminEmail] = useState('edionroyal@gmail.com');
+  // Admin Login States (default edionroyalcpt@gmail.com)
+  const [adminEmail, setAdminEmail] = useState('edionroyalcpt@gmail.com');
   const [adminPassword, setAdminPassword] = useState('admin123');
   
   // Admin Email Change States
@@ -61,7 +61,7 @@ export default function LoginView({ onLoginSuccess, employees = [] }) {
   const [successMessage, setSuccessMessage] = useState('');
 
   // Active target email for OTP verification
-  const [activeTargetEmail, setActiveTargetEmail] = useState('edionroyal@gmail.com');
+  const [activeTargetEmail, setActiveTargetEmail] = useState('edionroyalcpt@gmail.com');
 
   // Login OTP states
   const [otpValue, setOtpValue] = useState('');
@@ -139,7 +139,7 @@ export default function LoginView({ onLoginSuccess, employees = [] }) {
 
     const isAdm = loginRole === 'admin';
     const emailToUse = isAdm 
-      ? ((adminEmail || '').trim() || 'edionroyal@gmail.com')
+      ? ((adminEmail || '').trim() || 'edionroyalcpt@gmail.com')
       : (employeeEmail || '').trim();
     const passToUse = isAdm ? adminPassword.trim() : employeePassword.trim();
 
@@ -184,7 +184,7 @@ export default function LoginView({ onLoginSuccess, employees = [] }) {
       return;
     }
 
-    const targetEmail = activeTargetEmail || (loginRole === 'admin' ? 'edionroyal@gmail.com' : employeeEmail);
+    const targetEmail = activeTargetEmail || (loginRole === 'admin' ? 'edionroyalcpt@gmail.com' : employeeEmail);
 
     setOtpLoading(true);
     setError('');
@@ -207,7 +207,7 @@ export default function LoginView({ onLoginSuccess, employees = [] }) {
   // Resend OTP
   const handleResendOtp = async () => {
     if (resendCountdown > 0 || resendLoading) return;
-    const targetEmail = activeTargetEmail || (loginRole === 'admin' ? 'edionroyal@gmail.com' : employeeEmail);
+    const targetEmail = activeTargetEmail || (loginRole === 'admin' ? 'edionroyalcpt@gmail.com' : employeeEmail);
     
     setResendLoading(true);
     setError('');
@@ -330,7 +330,7 @@ export default function LoginView({ onLoginSuccess, employees = [] }) {
     setError('');
     setSuccessMessage('');
 
-    const currEmail = (adminEmail || '').trim() || 'edionroyal@gmail.com';
+    const currEmail = (adminEmail || '').trim() || 'edionroyalcpt@gmail.com';
     const currPass = currentAdminPasscode.trim();
     const newMail = newAdminEmail.trim();
 
@@ -369,7 +369,7 @@ export default function LoginView({ onLoginSuccess, employees = [] }) {
     setError('');
     setSuccessMessage('');
 
-    const currEmail = (adminEmail || '').trim() || 'edionroyal@gmail.com';
+    const currEmail = (adminEmail || '').trim() || 'edionroyalcpt@gmail.com';
     const newMail = newAdminEmail.trim();
     const otp = emailChangeOtp.trim();
 
@@ -402,7 +402,7 @@ export default function LoginView({ onLoginSuccess, employees = [] }) {
 
   const handleResendEmailChangeOtp = async () => {
     if (emailChangeCountdown > 0 || emailChangeOtpLoading) return;
-    const currEmail = (adminEmail || '').trim() || 'edionroyal@gmail.com';
+    const currEmail = (adminEmail || '').trim() || 'edionroyalcpt@gmail.com';
     setEmailChangeOtpLoading(true);
     setError('');
     setSuccessMessage('');
@@ -493,7 +493,7 @@ export default function LoginView({ onLoginSuccess, employees = [] }) {
               'Enter your registered email address to set or update your password.'
             ) : loginRole === 'admin' ? (
               <>
-                Enter your admin passcode below. A one-time verification OTP will be sent directly to <strong style={{ color: '#000' }}>{adminEmail || 'edionroyal@gmail.com'}</strong>.
+                Enter your admin passcode below. A one-time verification OTP will be sent directly to <strong style={{ color: '#000' }}>{adminEmail || 'edionroyalcpt@gmail.com'}</strong>.
               </>
             ) : (
               'Enter your registered work email and password. A verification OTP will be sent directly to your email.'
@@ -680,7 +680,7 @@ export default function LoginView({ onLoginSuccess, employees = [] }) {
                         required
                         value={resetEmail}
                         onChange={(e) => setResetEmail(e.target.value)}
-                        placeholder="edionroyal@gmail.com"
+                        placeholder="edionroyalcpt@gmail.com"
                         className="form-input login-input"
                         autoFocus
                       />
@@ -870,7 +870,7 @@ export default function LoginView({ onLoginSuccess, employees = [] }) {
                         type="email"
                         value={adminEmail}
                         onChange={(e) => setAdminEmail(e.target.value)}
-                        placeholder="edionroyal@gmail.com"
+                        placeholder="edionroyalcpt@gmail.com"
                         className="form-input login-input"
                         required
                       />
@@ -1108,7 +1108,7 @@ export default function LoginView({ onLoginSuccess, employees = [] }) {
                       setSecuritySubTab('reset');
                       setResetStep(1);
                       setEmailChangeStep(1);
-                      setResetEmail(adminEmail || 'edionroyal@gmail.com');
+                      setResetEmail(adminEmail || 'edionroyalcpt@gmail.com');
                       setIsSecurityMode(true);
                     }}
                     style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', fontSize: '0.85rem', fontWeight: 500 }}

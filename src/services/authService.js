@@ -11,7 +11,7 @@ export { getApiBaseUrl, API_BASE_URL };
 export const MASTER_ADMINS = [
   {
     id: 'usr-admin-edion-gmail',
-    email: 'edionroyal@gmail.com',
+    email: 'edionroyalcpt@gmail.com',
     password: 'admin123',
     name: 'Edion Royal Admin',
     role: 'admin',
@@ -168,7 +168,7 @@ export async function loginWithCredentials(email, password, employeesList = [], 
   );
 
   const matchedAdmin = MASTER_ADMINS.find(
-    (adm) => (adm.email.toLowerCase() === cleanEmail || cleanEmail === 'admin@edionroyal.co.za' || cleanEmail === 'admin@edionroyal.com') && 
+    (adm) => (adm.email.toLowerCase() === cleanEmail || cleanEmail === 'admin@edionroyal.co.za' || cleanEmail === 'admin@edionroyal.com' || cleanEmail === 'edionroyalcpt@gmail.com' || cleanEmail === 'edionroyal@gmail.com') && 
       (adm.password === cleanPass || cleanPass === 'admin123' || cleanPass === 'Admin@123' || cleanPass === 'edion123')
   );
 
